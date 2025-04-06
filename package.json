@@ -1,5 +1,5 @@
 {
-  "name": "reminder-bot",
+  "name": "google-calender-reminder-bot",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify"
