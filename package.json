@@ -1,14 +1,21 @@
 {
-  "name": "google-calender-reminder-bot",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify"
-  },
-  "dependencies": {
-    "hono": "^4.7.5"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250214.0",
-    "wrangler": "^4.4.0"
-  }
+	"name": "google-calender-reminder-bot",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"fix": "pnpm fix:format && pnpm fix:lint",
+		"fix:format": "biome format --fix",
+		"fix:lint": "biome lint --fix",
+		"check": "pnpm check:format && pnpm check:lint",
+		"check:format": "biome format",
+		"check:lint": "biome lint"
+	},
+	"dependencies": {
+		"hono": "^4.7.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@cloudflare/workers-types": "^4.20250214.0",
+		"wrangler": "^4.4.0"
+	}
 }
