@@ -21,14 +21,20 @@ wget -qO- https://get.pnpm.io/install.sh | sh -
 
 - Windowsの場合
 
-```bash
+```
 Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
 ```
 
 ### 必要パッケージのインストール
 
-```
+```bash
 pnpm install
+```
+
+### サーバーの起動
+
+```bash
+pnpm dev
 ```
 
 ### デプロイ
@@ -36,6 +42,6 @@ pnpm install
 以下のコマンドを実行するだけでデプロイをすることができます.
 ※基本的にGithub Actions上でのデプロイを想定しているため, 手元でこちらのコマンドは実行しないようにお願いします.
 
-```
-npm run deploy
+```bash
+pnpm deploy
 ```
