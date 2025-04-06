@@ -43,5 +43,5 @@ pnpm dev
 ※基本的にGithub Actions上でのデプロイを想定しているため, 手元でこちらのコマンドは実行しないようにお願いします.
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
