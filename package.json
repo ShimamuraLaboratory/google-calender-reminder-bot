@@ -2,6 +2,7 @@
 	"name": "google-calender-reminder-bot",
 	"scripts": {
 		"dev": "wrangler dev",
+		"build": "wrangler build",
 		"deploy": "wrangler deploy --minify",
 		"fix": "pnpm fix:format && pnpm fix:lint",
 		"fix:format": "biome format --fix",
