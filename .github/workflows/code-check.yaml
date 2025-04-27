@@ -20,7 +20,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 10.6.5
-          run_install: true
+          run_install: false
       
       - name: cache lockfile
         uses: actions/cache@v3
