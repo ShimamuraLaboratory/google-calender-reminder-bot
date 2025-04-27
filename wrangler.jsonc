@@ -24,7 +24,7 @@
 	"d1_databases": [
 	  {
 	    "binding": "D1_DATABASE",
-	    "database_name": "calendar-reminder-db",
+	    "database_name": "calendar-reminder",
 	    "database_id": "c04eb360-efbf-4199-a0e5-2e064d88b81c"
 	  }
 	],
