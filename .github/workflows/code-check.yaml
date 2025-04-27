@@ -1,0 +1,42 @@
+name: Code Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.6.5
+          run_install: true
+      
+      - name: cache lockfile
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            pnpm-lock.yaml
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: check code
+        run: pnpm check
+
+      
+
