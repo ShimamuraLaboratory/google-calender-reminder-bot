@@ -7,9 +7,9 @@ erDiagram
     roles {
         string role_id PK "Discordのrole_idをそのまま使用"
         string name "Role名"
-        timestamp created_at
-        timestamp updated_at
-        timestamp deleted_at
+        string created_at
+        string updated_at
+        string deleted_at
     }
 
     members {
@@ -17,9 +17,9 @@ erDiagram
         string last_name "名前"
         string first_name "苗字"
         string user_name "Discordのユーザー名"
-        timestamp created_at
-        timestamp updated_at
-        timestamp deleted_at
+        string created_at
+        string updated_at
+        string deleted_at
     }
 
     role_member {
@@ -31,8 +31,8 @@ erDiagram
         string id PK "リマインダーのID, UUID"
         string text "リマインダー本文"
         string schedule_id FK "予定のID"
-        timestamp sended_at "送信日時"
-        timestamp deleted_at
+        string sended_at "送信日時"
+        string deleted_at
     }
 
     remind_member {
@@ -46,9 +46,9 @@ erDiagram
         string destiribution "概要"
         datetime scheduled_at "予定日時"
         int reminde_days "何日前にリマインドするか"
-        timestamp created_at
-        timestamp updated_at
-        timestamp deleted_at
+        string created_at
+        string updated_at
+        string deleted_at
     }
 
     schedule_member {
