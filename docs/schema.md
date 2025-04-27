@@ -43,8 +43,11 @@ erDiagram
     schedules {
         text id PK "予定のID, UUID"
         text title "予定のタイトル"
+        text calendar_id "カレンダーのID"
+        text event_id "google calendar上でのイベントID"
         text destiribution "概要"
-        text scheduled_at "予定日時"
+        text start_at "開始日時"
+        text end_at "終了日時"
         int reminde_days "何日前にリマインドするか"
         text created_at
         text updated_at

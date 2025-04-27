@@ -93,9 +93,12 @@ export const remindsRelations = relations(reminds, ({ many, one }) => ({
 
 export const schedules = table("schedules", {
 	id: text("id").primaryKey(),
+	calendarId: text("calendar_id"),
+	eventId: text("event_id"),
 	title: text("title").notNull(),
 	distribution: text("distribution").notNull(),
-	scheduledAt: text("scheduled_at").notNull(),
+	startAt: text("start_at").notNull(),
+	endAt: text("end_at").notNull(),
 	remindDays: integer("remind_days").notNull(),
 	createdAt: text("created_at").notNull(),
 	updatedAt: text("updated_at").notNull(),
