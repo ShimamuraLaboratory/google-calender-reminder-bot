@@ -22,12 +22,12 @@ jobs:
           version: 10.6.5
           run_install: true
       
-      - name: cache lockfile
+      - name: cache pnpm
         uses: actions/cache@v3
         with:
           path: |
             node_modules
-            pnpm-lock.yaml
+            .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
