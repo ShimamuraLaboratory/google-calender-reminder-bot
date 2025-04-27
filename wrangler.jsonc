@@ -2,7 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "shima-google-reminder-bot",
 	"main": "src/index.ts",
-	"compatibility_date": "2025-04-06"
+	"compatibility_date": "2025-04-06",
 	// "compatibility_flags": [
 	//   "nodejs_compat"
 	// ],
@@ -21,13 +21,13 @@
 	//     "bucket_name": "my-bucket"
 	//   }
 	// ],
-	// "d1_databases": [
-	//   {
-	//     "binding": "MY_DB",
-	//     "database_name": "my-database",
-	//     "database_id": ""
-	//   }
-	// ],
+	"d1_databases": [
+	  {
+	    "binding": "D1_DATABASE",
+	    "database_name": "calendar-reminder-db",
+	    "database_id": "c04eb360-efbf-4199-a0e5-2e064d88b81c"
+	  }
+	],
 	// "ai": {
 	//   "binding": "AI"
 	// },
