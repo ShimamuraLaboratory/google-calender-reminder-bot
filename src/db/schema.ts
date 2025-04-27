@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-	sqliteTable as table,
-	text,
-	integer,
-	primaryKey,
-} from "drizzle-orm/sqlite-core";
-import * as t from "drizzle-orm/sqlite-core";
+import { sqliteTable as table, text, integer } from "drizzle-orm/sqlite-core";
 
 export const roles = table("roles", {
 	roleId: text("role_id").primaryKey(),
