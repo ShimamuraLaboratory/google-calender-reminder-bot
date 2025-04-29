@@ -3,7 +3,6 @@ import { schedules } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { eq } from "drizzle-orm";
 
-// TODO: any型は排除する (2025/04/29)
 export interface IScheduleRepository {
 	findByEventId(id: string): Promise<Schedule | undefined>;
 	insert(
