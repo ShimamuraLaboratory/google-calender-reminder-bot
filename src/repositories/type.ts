@@ -19,3 +19,13 @@ export type Schedule = {
 	updatedAt: string;
 	deletedAt: string | null;
 };
+
+export type Member = {
+	memberId: string;
+	lastName: string;
+	firstName: string;
+	userName: string;
+	createdAt: string;
+	updatedAt: string;
+	deletedAt: string | null;
+};
