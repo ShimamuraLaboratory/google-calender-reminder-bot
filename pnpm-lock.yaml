@@ -11,6 +11,12 @@ importers:
       '@libsql/client':
         specifier: ^0.15.4
         version: 0.15.4
+      discord-api-types:
+        specifier: ^0.38.1
+        version: 0.38.1
+      discord-interactions:
+        specifier: ^4.1.1
+        version: 4.1.1
       drizzle-orm:
         specifier: ^0.43.1
         version: 0.43.1(@cloudflare/workers-types@4.20250406.0)(@libsql/client@0.15.4)
@@ -824,6 +830,13 @@ packages:
     resolution: {integrity: sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==}
     engines: {node: '>=8'}
 
+  discord-api-types@0.38.1:
+    resolution: {integrity: sha512-vsjsqjAuxsPhiwbPjTBeGQaDPlizFmSkU0mTzFGMgRxqCDIRBR7iTY74HacpzrDV0QtERHRKQEk1tq7drZUtHg==}
+
+  discord-interactions@4.1.1:
+    resolution: {integrity: sha512-dCrdJFSHQrEHXB8tk+LpIhAL7/+/UXCFDzooYmB6jj7b/zuhdbETpcZXLYQpSfcSRpF5wjmnu1XwuHlvdF1KpQ==}
+    engines: {node: '>=18.4.0'}
+
   drizzle-kit@0.31.0:
     resolution: {integrity: sha512-pcKVT+GbfPA+bUovPIilgVOoq+onNBo/YQBG86sf3/GFHkN6lRJPm1l7dKN0IMAk57RQoIm4GUllRrasLlcaSg==}
     hasBin: true
@@ -978,7 +991,6 @@ packages:
 
   libsql@0.5.8:
     resolution: {integrity: sha512-+OopMI1wM/NvAJTHf3O3+beHd1YfKLnSVsOGBl3/7UBDZ4ydVadkbBk5Hjjs9d3ALC5rBaftMY59AvwyC8MzPw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   mime@3.0.0:
@@ -1605,6 +1617,10 @@ snapshots:
 
   detect-libc@2.0.3:
     optional: true
+
+  discord-api-types@0.38.1: {}
+
+  discord-interactions@4.1.1: {}
 
   drizzle-kit@0.31.0:
     dependencies:
