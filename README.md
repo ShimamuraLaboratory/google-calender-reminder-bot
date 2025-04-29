@@ -7,28 +7,10 @@
 
 ### 環境構築
 
-パッケージマネジャーの`pnpm`をインストールしてください.
-
-- linux(ubuntu)環境の場合
+google-calender-reminder-botディレクトリ直下にて以下のコマンドを実行することで自動で環境構築されます.
 
 ```bash
-# curlがインストールされている場合
-curl -fsSL https://get.pnpm.io/install.sh | sh -
-
-# curlがインストールされていない場合
-wget -qO- https://get.pnpm.io/install.sh | sh -
-```
-
-- Windowsの場合
-
-```
-Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
-```
-
-### 必要パッケージのインストール
-
-```bash
-pnpm install
+make build_environment
 ```
 
 ### サーバーの起動
