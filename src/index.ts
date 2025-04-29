@@ -8,7 +8,7 @@ export type Bindings = {
 	DISCORD_APP_ID: string;
 	DISCORD_BOT_TOKEN: string;
 	DISCORD_PERMISSION_ID: string;
-	D1Database: D1Database;
+	D1_DATABASE: D1Database;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
