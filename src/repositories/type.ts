@@ -5,3 +5,17 @@ export type Role = {
 	updatedAt: string;
 	deletedAt: string | null;
 };
+
+export type Schedule = {
+    id: string;
+    calendarId: string | null;
+    eventId: string | null;
+    title: string;
+    distribution: string;
+    startAt: string;
+    endAt: string;
+    remindDays: number;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+};
