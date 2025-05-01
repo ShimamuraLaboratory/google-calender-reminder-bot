@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
-import { DiscordClient } from "./client/discord";
+import { DiscordClient } from "./repositories/discord/client";
 import { InteractionResponseType, verifyKey } from "discord-interactions";
 
 export type Bindings = {
