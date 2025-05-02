@@ -57,6 +57,8 @@ export const reminds = table("reminds", {
 		.notNull()
 		.references(() => schedules.id, { onDelete: "cascade" }),
 	sendedAt: text("sended_at"),
+	createdAt: text("created_at").notNull(),
+	updatedAt: text("updated_at").notNull(),
 	deletedAt: text("deleted_at"),
 });
 
