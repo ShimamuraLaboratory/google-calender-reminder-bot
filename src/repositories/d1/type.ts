@@ -19,6 +19,9 @@ export type Schedule = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	members?: Member[];
+	roles?: Role[];
+	reminds?: Remind[];
 };
 
 export type Member = {
