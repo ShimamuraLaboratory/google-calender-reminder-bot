@@ -28,6 +28,7 @@ export type Member = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	roles?: Role[];
 };
 
 export type Remind = {
