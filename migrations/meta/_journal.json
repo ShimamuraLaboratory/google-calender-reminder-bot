@@ -15,6 +15,13 @@
 			"when": 1745744596341,
 			"tag": "0001_chubby_darkhawk",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1746189352588,
+			"tag": "0002_clear_hardball",
+			"breakpoints": true
 		}
 	]
 }
