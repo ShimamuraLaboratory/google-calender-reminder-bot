@@ -39,4 +39,6 @@ export type Remind = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	schedule?: Schedule;
+	members?: Member[];
 };
