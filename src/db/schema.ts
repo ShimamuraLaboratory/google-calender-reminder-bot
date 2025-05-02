@@ -42,7 +42,8 @@ export const roleMemberRelations = relations(roleMember, ({ one }) => ({
 }));
 
 export const rolesRelations = relations(roles, ({ many }) => ({
-	members: many(roleMember),
+	roleMembers: many(roleMember),
+	scheduleRoles: many(scheduleRole),
 }));
 export const membersRelations = relations(members, ({ many }) => ({
 	roleMembers: many(roleMember),

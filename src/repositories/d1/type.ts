@@ -4,6 +4,7 @@ export type Role = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	members?: Member[];
 };
 
 export type Schedule = {

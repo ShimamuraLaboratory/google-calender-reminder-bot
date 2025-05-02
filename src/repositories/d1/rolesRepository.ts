@@ -1,5 +1,5 @@
 import type { Role } from "./type";
-import { roles } from "@/db/schema";
+import { roleMember, roles, scheduleRole } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { eq } from "drizzle-orm";
 
@@ -20,16 +20,59 @@ export interface IRoleRepository {
 export class RoleRepository extends BaseRepository implements IRoleRepository {
 	async findById(id: string): Promise<Role | undefined> {
 		const res = await this.db.query.roles.findFirst({
-			where: (roles, { eq }) => eq(roles.roleId, id),
+			where: (roles, { and, isNull, eq }) =>
+				and(eq(roles.roleId, id), isNull(roles.deletedAt)),
+			with: {
+				roleMembers: {
+					with: {
+						member: {},
+					},
+				},
+			},
 		});
-		return res;
+
+		if (!res) {
+			return undefined;
+		}
+
+		const formattedRes: Role = {
+			roleId: res.roleId,
+			name: res.name,
+			createdAt: res.createdAt,
+			updatedAt: res.updatedAt,
+			deletedAt: res.deletedAt,
+			members: res.roleMembers.map((roleMember) => ({
+				...roleMember.member,
+			})),
+		};
+
+		return formattedRes;
 	}
 
 	async findByIds(ids: string[]): Promise<Role[]> {
 		const res = await this.db.query.roles.findMany({
-			where: (roles, { inArray }) => inArray(roles.roleId, ids),
+			where: (roles, { and, isNull, inArray }) =>
+				and(inArray(roles.roleId, ids), isNull(roles.deletedAt)),
+			with: {
+				roleMembers: {
+					with: {
+						member: {},
+					},
+				},
+			},
 		});
-		return res;
+
+		const formattedRes: Role[] = res.map((role) => {
+			const { roleMembers, ...rest } = role;
+			return {
+				...rest,
+				members: roleMembers.map((roleMember) => ({
+					...roleMember.member,
+				})),
+			};
+		});
+
+		return formattedRes;
 	}
 
 	async insert(
@@ -58,6 +101,14 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
 			.update(roles)
 			.set({ deletedAt: new Date().toISOString() })
 			.where(eq(roles.roleId, id))
+			.execute();
+
+		// NOTE: 中間テーブルの削除
+		await this.db.delete(roleMember).where(eq(roleMember.roleId, id)).execute();
+
+		await this.db
+			.delete(scheduleRole)
+			.where(eq(scheduleRole.roleId, id))
 			.execute();
 	}
 }
