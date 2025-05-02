@@ -4,6 +4,7 @@ export type Role = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	members?: Member[];
 };
 
 export type Schedule = {
@@ -18,6 +19,9 @@ export type Schedule = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	members?: Member[];
+	roles?: Role[];
+	reminds?: Remind[];
 };
 
 export type Member = {
@@ -28,6 +32,7 @@ export type Member = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	roles?: Role[];
 };
 
 export type Remind = {
@@ -38,4 +43,6 @@ export type Remind = {
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
+	schedule?: Schedule;
+	members?: Member[];
 };
