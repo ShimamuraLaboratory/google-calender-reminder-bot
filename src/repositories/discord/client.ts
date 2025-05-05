@@ -1,10 +1,20 @@
 import { DISCORD_FETCH_ROLE_URL, DISCORD_FETCH_USER_URL } from "@/constant";
 import type {
   RESTGetAPIGuildMembersResult,
+  RESTGetAPIGuildRolesResult,
   RESTPostAPIChannelMessageResult,
 } from "discord-api-types/v10";
 
-export class DiscordClient {
+export interface IDiscordClient {
+  sendMessage(
+    channelId: string,
+    body: RESTPostAPIChannelMessageResult,
+  ): Promise<RESTPostAPIChannelMessageResult>;
+  fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
+  fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
+}
+
+export class DiscordClient implements IDiscordClient {
   private BASE_URL = "https://discord.com/api/v10";
   private config: {
     headers: Record<string, string>;
@@ -19,6 +29,13 @@ export class DiscordClient {
     };
   }
 
+  /**
+   * Discordのチャンネルにメッセージを送信するメソッド
+   *
+   * @param channelId
+   * @param body
+   * @returns
+   */
   async sendMessage(
     channelId: string,
     body: RESTPostAPIChannelMessageResult,
@@ -39,6 +56,12 @@ export class DiscordClient {
     return response.json();
   }
 
+  /**
+   * Discordサーバー内のメンバー情報を取得するメソッド
+   *
+   * @param guildId
+   * @returns
+   */
   async fetchGuildMembers(
     guildId: string,
   ): Promise<RESTGetAPIGuildMembersResult> {
@@ -57,9 +80,13 @@ export class DiscordClient {
     return response.json() as Promise<RESTGetAPIGuildMembersResult>;
   }
 
-  async fetchGuildRoles(
-    guildId: string,
-  ): Promise<RESTGetAPIGuildMembersResult> {
+  /**
+   * Discordサーバー内のロール情報を取得するメソッド
+   *
+   * @param guildId
+   * @returns
+   */
+  async fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult> {
     const response = await fetch(
       DISCORD_FETCH_ROLE_URL.replace("{guild_id}", guildId),
       {
@@ -72,6 +99,6 @@ export class DiscordClient {
       throw new Error(`Failed to fetch group roles: ${response.statusText}`);
     }
 
-    return response.json() as Promise<RESTGetAPIGuildMembersResult>;
+    return response.json() as Promise<RESTGetAPIGuildRolesResult>;
   }
 }
