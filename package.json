@@ -14,10 +14,12 @@
 		"database:migrate:up": "wrangler d1 migrations apply calendar-reminder --remote"
 	},
 	"dependencies": {
+		"@google-cloud/local-auth": "2.1.0",
 		"@libsql/client": "^0.15.4",
 		"discord-api-types": "^0.38.1",
 		"discord-interactions": "^4.1.1",
 		"drizzle-orm": "^0.43.1",
+		"googleapis": "^105.0.0",
 		"hono": "^4.7.5"
 	},
 	"devDependencies": {
