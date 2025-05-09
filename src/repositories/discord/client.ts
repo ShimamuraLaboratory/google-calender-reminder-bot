@@ -65,13 +65,10 @@ export class DiscordClient implements IDiscordClient {
   async fetchGuildMembers(
     guildId: string,
   ): Promise<RESTGetAPIGuildMembersResult> {
-    const response = await fetch(
-      DISCORD_FETCH_USER_URL.replace("{guild_id}", guildId),
-      {
-        method: "GET",
-        headers: this.config.headers,
-      },
-    );
+    const response = await fetch(`${this.BASE_URL}/guilds/${guildId}/members`, {
+      method: "GET",
+      headers: this.config.headers,
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch group members: ${response.statusText}`);
@@ -87,13 +84,10 @@ export class DiscordClient implements IDiscordClient {
    * @returns
    */
   async fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult> {
-    const response = await fetch(
-      DISCORD_FETCH_ROLE_URL.replace("{guild_id}", guildId),
-      {
-        method: "GET",
-        headers: this.config.headers,
-      },
-    );
+    const response = await fetch(`${this.BASE_URL}/guilds/${guildId}/roles`, {
+      method: "GET",
+      headers: this.config.headers,
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch group roles: ${response.statusText}`);

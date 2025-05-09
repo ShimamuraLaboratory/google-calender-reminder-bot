@@ -12,11 +12,6 @@ const COMMANDS: Record<string, string> = {
   [DELETE_COMMAND]: "delete",
 };
 
-const DISCORD_FETCH_ROLE_URL =
-  "https://discord.com/api/v10/guilds/{guild_id}/roles";
-const DISCORD_FETCH_USER_URL =
-  "https://discord.com/api/v10/guilds/{guild_id}/members";
-
 export {
   COMMANDS as COMMAND_LIST,
   ADD_COMMAND,
@@ -24,6 +19,4 @@ export {
   SHOW_COMMAND,
   UPDATE_COMMAND,
   DELETE_COMMAND,
-  DISCORD_FETCH_ROLE_URL,
-  DISCORD_FETCH_USER_URL,
 };
