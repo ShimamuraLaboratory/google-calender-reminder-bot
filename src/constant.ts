@@ -1,22 +1,22 @@
-const ADD_COMMAND = "add";
-const LIST_COMMAND = "list";
-const SHOW_COMMAND = "show";
-const UPDATE_COMMAND = "update";
-const DELETE_COMMAND = "delete";
+const SUB_COMMAND_ADD = "add";
+const SUB_COMMAND_LIST = "list";
+const SUB_COMMAND_SHOW = "show";
+const SUB_COMMAND_UPDATE = "update";
+const SUB_COMMAND_DELETE = "delete";
 
-const COMMANDS: Record<string, string> = {
-  [ADD_COMMAND]: "add",
-  [LIST_COMMAND]: "list",
-  [SHOW_COMMAND]: "show",
-  [UPDATE_COMMAND]: "update",
-  [DELETE_COMMAND]: "delete",
+const COMMAND_DISCRIPTIONS: Record<string, string> = {
+  [SUB_COMMAND_ADD]: "Googleカレンダーに予定を追加します",
+  [SUB_COMMAND_LIST]: "指定期間におけるGoogleカレンダーの予定を一覧表示します",
+  [SUB_COMMAND_SHOW]: "指定した予定の詳細を表示します",
+  [SUB_COMMAND_UPDATE]: "指定した予定を更新します",
+  [SUB_COMMAND_DELETE]: "指定した予定を削除します",
 };
 
 export {
-  COMMANDS as COMMAND_LIST,
-  ADD_COMMAND,
-  LIST_COMMAND,
-  SHOW_COMMAND,
-  UPDATE_COMMAND,
-  DELETE_COMMAND,
+  COMMAND_DISCRIPTIONS,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_LIST,
+  SUB_COMMAND_SHOW,
+  SUB_COMMAND_UPDATE,
+  SUB_COMMAND_DELETE,
 };
