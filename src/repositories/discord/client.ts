@@ -1,4 +1,3 @@
-import { DISCORD_FETCH_ROLE_URL, DISCORD_FETCH_USER_URL } from "@/constant";
 import type {
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
