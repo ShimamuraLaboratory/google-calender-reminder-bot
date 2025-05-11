@@ -26,8 +26,8 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
   async (c, next) => {
-    const signature = c.req.header("X-Signature-Ed25519");
-    const timestamp = c.req.header("X-Signature-Timestamp");
+    const signature = c.req.header("x-signature-ed25519");
+    const timestamp = c.req.header("x-signature-timestamp");
     const rawBody = await c.req.raw.clone().text();
 
     const isValid =
