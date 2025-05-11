@@ -1,3 +1,6 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { DiscordClient } from "./repositories/discord/client";
@@ -25,6 +28,10 @@ export type Bindings = {
   REMINDER_CHANNEL_ID: string;
   D1_DATABASE: D1Database;
 };
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Tokyo");
 
 const app = new Hono<{ Bindings: Bindings }>();
 
