@@ -67,7 +67,13 @@ app.post("/", verifyMiddleware, async (c) => {
   await handler
     .handleCommand(body)
     .then((response) => {
-      c.json(response);
+      c.json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: response,
+          flags: 64,
+        },
+      });
     })
     .catch((e) => {
       c.json({
