@@ -18,6 +18,24 @@ type SlashCommandObj = APIBaseInteraction<
   }
 >;
 
+interface SlashCommandResponse {
+  type: number;
+  data?: {
+    content: string;
+    embeds?: {
+      title: string;
+      description: string;
+      color: number;
+      fields: {
+        name: string;
+        value: string;
+        inline: boolean;
+      }[];
+    }[];
+    flags?: number;
+  };
+}
+
 export class Handlers {
   private commandService: ICommandService | undefined;
   private subscribeService: ISubscribeService | undefined;
@@ -30,7 +48,7 @@ export class Handlers {
     this.subscribeService = subscribeService;
   }
 
-  async handleCommand(body: SlashCommandObj) {
+  async handleCommand(body: SlashCommandObj): Promise<SlashCommandResponse> {
     const subCommand = body.data?.name;
     if (SUB_COMMANDS.has(subCommand || "")) {
       throw new Error("Invalid subcommand");
@@ -98,11 +116,28 @@ export class Handlers {
           },
         };
 
-        await this.commandService.addCommandImpl(scheduleData).catch((e) => {
-          throw new Error(e);
-        });
+        const message = await this.commandService
+          .addCommandImpl(scheduleData)
+          .catch((e) => {
+            throw new Error(e);
+          });
+
+        return {
+          type: 4,
+          data: {
+            content: message,
+            flags: 64,
+          },
+        };
       }
     }
+
+    return {
+      type: 4,
+      data: {
+        content: "Unknown command",
+      },
+    };
   }
 
   async handleSubscribeCommand(appId: string, guildId: string) {

@@ -64,7 +64,20 @@ app.post("/", verifyMiddleware, async (c) => {
   );
   const handler = new Handlers(commandService);
 
-  await handler.handleCommand(body);
+  await handler
+    .handleCommand(body)
+    .then((response) => {
+      c.json(response);
+    })
+    .catch((e) => {
+      c.json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: e.message,
+          flags: 64,
+        },
+      });
+    });
 });
 
 app.all("/subscribe_command", async (c) => {
