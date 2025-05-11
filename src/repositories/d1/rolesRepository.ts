@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 
 // TODO: any型は排除する (2025/04/29)
 export interface IRoleRepository {
+  findAll(): Promise<Role[]>;
   findById(id: string): Promise<Role | undefined>;
   findByIds(ids: string[]): Promise<Role[]>;
   insert(
@@ -18,6 +19,31 @@ export interface IRoleRepository {
 }
 
 export class RoleRepository extends BaseRepository implements IRoleRepository {
+  async findAll(): Promise<Role[]> {
+    const res = await this.db.query.roles.findMany({
+      where: (roles, { isNull }) => isNull(roles.deletedAt),
+      with: {
+        roleMembers: {
+          with: {
+            member: {},
+          },
+        },
+      },
+    });
+
+    const formattedRes: Role[] = res.map((role) => {
+      const { roleMembers, ...rest } = role;
+      return {
+        ...rest,
+        members: roleMembers.map((roleMember) => ({
+          ...roleMember.member,
+        })),
+      };
+    });
+
+    return formattedRes;
+  }
+
   async findById(id: string): Promise<Role | undefined> {
     const res = await this.db.query.roles.findFirst({
       where: (roles, { and, isNull, eq }) =>

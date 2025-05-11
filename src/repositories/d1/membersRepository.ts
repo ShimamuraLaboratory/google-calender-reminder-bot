@@ -4,6 +4,7 @@ import { members, roleMember, scheduleMember, remindMember } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 
 export interface IMemberRepository {
+  findAll(): Promise<Member[]>;
   findById(id: string): Promise<Member | undefined>;
   findByIds(ids: string[]): Promise<Member[]>;
   findByRoles(roleId: string[]): Promise<Member[]>;
@@ -23,6 +24,29 @@ export class MemberRepository
   extends BaseRepository
   implements IMemberRepository
 {
+  async findAll(): Promise<Member[]> {
+    const res = await this.db.query.members.findMany({
+      where: (members, { isNull }) => isNull(members.deletedAt),
+      with: {
+        roleMembers: {
+          with: {
+            role: {},
+          },
+        },
+      },
+    });
+
+    const formattedRes = res.map((member) => {
+      const { roleMembers, ...rest } = member;
+      return {
+        ...rest,
+        roles: roleMembers.map((roleMember) => roleMember.role),
+      };
+    });
+
+    return formattedRes;
+  }
+
   async findById(id: string): Promise<Member | undefined> {
     const res = await this.db.query.members.findFirst({
       where: (members, { eq }) => eq(members.memberId, id),

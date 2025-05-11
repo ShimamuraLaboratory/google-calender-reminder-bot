@@ -1,16 +1,23 @@
 import type {
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
+  RESTPostAPIChannelMessageJSONBody,
   RESTPostAPIChannelMessageResult,
 } from "discord-api-types/v10";
 
 export interface IDiscordClient {
   sendMessage(
     channelId: string,
-    body: RESTPostAPIChannelMessageResult,
+    body: RESTPostAPIChannelMessageJSONBody,
   ): Promise<RESTPostAPIChannelMessageResult>;
   fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
   fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
+  subscribeCommand(
+    // @ts-ignore
+    commands,
+    appId: string,
+    guildId: string,
+  ): Promise<void>;
 }
 
 export class DiscordClient implements IDiscordClient {
@@ -37,7 +44,7 @@ export class DiscordClient implements IDiscordClient {
    */
   async sendMessage(
     channelId: string,
-    body: RESTPostAPIChannelMessageResult,
+    body: RESTPostAPIChannelMessageJSONBody,
   ): Promise<RESTPostAPIChannelMessageResult> {
     const response = await fetch(
       `${this.BASE_URL}/channels/${channelId}/messages`,
@@ -93,5 +100,35 @@ export class DiscordClient implements IDiscordClient {
     }
 
     return response.json() as Promise<RESTGetAPIGuildRolesResult>;
+  }
+
+  /**
+   * Discordのコマンドをサーバーに登録するメソッド
+   *
+   * @param commands
+   * @param appId
+   * @param guildId
+   * @returns
+   */
+  async subscribeCommand(
+    // @ts-ignore
+    commands,
+    appId: string,
+    guildId: string,
+  ): Promise<void> {
+    const response = await fetch(
+      `${this.BASE_URL}/applications/${appId}/guilds/${guildId}/commands`,
+      {
+        method: "POST",
+        headers: this.config.headers,
+        body: JSON.stringify(commands),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("コマンドの登録に失敗しました");
+    }
+
+    return;
   }
 }

@@ -2,12 +2,23 @@ import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { DiscordClient } from "./repositories/discord/client";
 import { InteractionResponseType, verifyKey } from "discord-interactions";
+import { ScheduleRepository } from "./repositories/d1/schedulesRepository";
+import { drizzle } from "drizzle-orm/d1";
+import * as schema from "./db/schema";
+import { CommandService } from "./services/commandService";
+import { GoogleCalendarClient } from "./repositories/google/cient";
+import { Handlers } from "./handler";
+import { RoleRepository } from "./repositories/d1/rolesRepository";
+import { MemberRepository } from "./repositories/d1/membersRepository";
+import { SubscribeService } from "./services/subscribeService";
 
 export type Bindings = {
   DISCORD_PUBLIC_KEY: string;
   DISCORD_APP_ID: string;
   DISCORD_BOT_TOKEN: string;
   DISCORD_PERMISSION_ID: string;
+  DISCORD_GUILD_ID: string;
+  REMINDER_CHANNEL_ID: string;
   D1_DATABASE: D1Database;
 };
 
@@ -38,7 +49,48 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
 );
 
 app.get("/", verifyMiddleware, async (c) => {
+  const body = await c.req.json();
+
+  const db = drizzle(c.env.D1_DATABASE, { schema: schema });
+
+  const discordClient = new DiscordClient(c.env.DISCORD_BOT_TOKEN);
+  const googleCalendarClient = new GoogleCalendarClient();
+  const scheduleRepository = new ScheduleRepository(db);
+  const commandService = new CommandService(
+    scheduleRepository,
+    discordClient,
+    googleCalendarClient,
+    c.env.REMINDER_CHANNEL_ID,
+  );
+  const handler = new Handlers(commandService);
+
+  await handler.handleCommand(body);
+
   return c.text("Hello Hono!");
+});
+
+app.all("/subscribe_command", async (c) => {
+  const db = drizzle(c.env.D1_DATABASE, { schema: schema });
+
+  const discordClient = new DiscordClient(c.env.DISCORD_BOT_TOKEN);
+  const roleRepository = new RoleRepository(db);
+  const memberRepository = new MemberRepository(db);
+
+  const subscribeService = new SubscribeService(
+    discordClient,
+    roleRepository,
+    memberRepository,
+  );
+
+  const handler = new Handlers(undefined, subscribeService);
+
+  await handler
+    .handleSubscribeCommand(c.env.DISCORD_APP_ID, c.env.DISCORD_GUILD_ID)
+    .catch((err) => {
+      console.error("Error subscribing commands:", err);
+    });
+
+  return c.text("コマンドの登録が完了しました");
 });
 
 export default app;
