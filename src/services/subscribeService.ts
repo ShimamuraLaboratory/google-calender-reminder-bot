@@ -4,7 +4,7 @@ import type { IRoleRepository } from "@/repositories/d1/rolesRepository";
 import type { IDiscordClient } from "@/repositories/discord/client";
 
 export interface ISubscribeService {
-  subscribeCommand(guildId: string): Promise<void>;
+  subscribeCommand(appId: string, guildId: string): Promise<void>;
 }
 
 export class SubscribeService implements ISubscribeService {
@@ -22,7 +22,7 @@ export class SubscribeService implements ISubscribeService {
     this.memberRepository = memberRepository;
   }
 
-  async subscribeCommand(guildId: string): Promise<void> {
+  async subscribeCommand(appId: string, guildId: string): Promise<void> {
     const roles = await this.roleRepository.findAll();
     const members = await this.memberRepository.findAll();
 
@@ -34,7 +34,7 @@ export class SubscribeService implements ISubscribeService {
     );
 
     await this.discordClient
-      .subscribeCommand(commands, guildId)
+      .subscribeCommand(commands, appId, guildId)
       .catch((err) => {
         throw new Error("サブコマンドの登録に失敗しました");
       });
