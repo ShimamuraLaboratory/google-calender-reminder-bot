@@ -51,10 +51,9 @@ export class ScheduleRepository
 
     const formattedRes: Schedule = {
       id: res.id,
-      calendarId: res.calendarId,
       eventId: res.eventId,
       title: res.title,
-      distribution: res.distribution,
+      description: res.description,
       startAt: res.startAt,
       endAt: res.endAt,
       remindDays: res.remindDays,

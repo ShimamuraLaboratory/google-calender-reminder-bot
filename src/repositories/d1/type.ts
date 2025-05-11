@@ -9,13 +9,12 @@ export type Role = {
 
 export type Schedule = {
   id: string;
-  calendarId: string | null;
   eventId: string | null;
   title: string;
-  distribution: string;
+  description: string | null;
   startAt: string;
   endAt: string;
-  remindDays: number;
+  remindDays: number | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
