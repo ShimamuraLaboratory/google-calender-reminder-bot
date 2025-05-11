@@ -48,7 +48,7 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
   },
 );
 
-app.get("/", verifyMiddleware, async (c) => {
+app.post("/", verifyMiddleware, async (c) => {
   const body = await c.req.json();
 
   const db = drizzle(c.env.D1_DATABASE, { schema: schema });
@@ -65,8 +65,6 @@ app.get("/", verifyMiddleware, async (c) => {
   const handler = new Handlers(commandService);
 
   await handler.handleCommand(body);
-
-  return c.text("Hello Hono!");
 });
 
 app.all("/subscribe_command", async (c) => {
