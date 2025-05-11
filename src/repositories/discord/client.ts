@@ -6,10 +6,6 @@ import type {
 } from "discord-api-types/v10";
 
 export interface IDiscordClient {
-  sendMessage(
-    channelId: string,
-    body: RESTPostAPIChannelMessageJSONBody,
-  ): Promise<RESTPostAPIChannelMessageResult>;
   fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
   fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
   subscribeCommand(
@@ -33,33 +29,6 @@ export class DiscordClient implements IDiscordClient {
         "Content-Type": "application/json",
       },
     };
-  }
-
-  /**
-   * Discordのチャンネルにメッセージを送信するメソッド
-   *
-   * @param channelId
-   * @param body
-   * @returns
-   */
-  async sendMessage(
-    channelId: string,
-    body: RESTPostAPIChannelMessageJSONBody,
-  ): Promise<RESTPostAPIChannelMessageResult> {
-    const response = await fetch(
-      `${this.BASE_URL}/channels/${channelId}/messages`,
-      {
-        method: "POST",
-        headers: this.config.headers,
-        body: JSON.stringify(body),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to send message: ${response.statusText}`);
-    }
-
-    return response.json();
   }
 
   /**

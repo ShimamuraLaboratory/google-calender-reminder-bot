@@ -2,13 +2,12 @@ import type { IGoogleCalendarClient } from "@/repositories/google/cient";
 import type { IDiscordClient } from "@/repositories/discord/client";
 import type { IScheduleRepository } from "@/repositories/d1/schedulesRepository";
 import type { AddCommandParams } from "./commandService.type";
-import type { RESTPostAPIChannelMessageJSONBody } from "discord-api-types/v10";
 import { embeddedMessage } from "@/lib/embeddedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";
 
 export interface ICommandService {
-  addCommandImpl(params: AddCommandParams): Promise<void>;
+  addCommandImpl(params: AddCommandParams): Promise<string>;
 }
 
 export class CommandService implements ICommandService {
@@ -29,7 +28,7 @@ export class CommandService implements ICommandService {
     this.channelId = channelId;
   }
 
-  async addCommandImpl(params: AddCommandParams): Promise<void> {
+  async addCommandImpl(params: AddCommandParams): Promise<string> {
     const newEvent = await this.googleCalendarClient
       .createEvent({
         summary: params.scheduleData.title,
@@ -83,12 +82,6 @@ export class CommandService implements ICommandService {
       },
     });
 
-    await this.discordClient
-      .sendMessage(this.channelId, {
-        content: message,
-      } as RESTPostAPIChannelMessageJSONBody)
-      .catch((e) => {
-        throw new Error("Discordメッセージの送信に失敗しました");
-      });
+    return message;
   }
 }
