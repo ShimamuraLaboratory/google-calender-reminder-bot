@@ -101,12 +101,8 @@
           "name": "remind_member_remind_id_reminds_id_fk",
           "tableFrom": "remind_member",
           "tableTo": "reminds",
-          "columnsFrom": [
-            "remind_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["remind_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -114,12 +110,8 @@
           "name": "remind_member_member_id_members_member_id_fk",
           "tableFrom": "remind_member",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "member_id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["member_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -187,12 +179,8 @@
           "name": "reminds_schedule_id_schedules_id_fk",
           "tableFrom": "reminds",
           "tableTo": "schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -239,12 +227,8 @@
           "name": "role_member_role_id_roles_role_id_fk",
           "tableFrom": "role_member",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "role_id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["role_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -252,12 +236,8 @@
           "name": "role_member_member_id_members_member_id_fk",
           "tableFrom": "role_member",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "member_id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["member_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -349,12 +329,8 @@
           "name": "schedule_member_schedule_id_schedules_id_fk",
           "tableFrom": "schedule_member",
           "tableTo": "schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -362,12 +338,8 @@
           "name": "schedule_member_member_id_members_member_id_fk",
           "tableFrom": "schedule_member",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "member_id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["member_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -414,12 +386,8 @@
           "name": "schedule_role_schedule_id_schedules_id_fk",
           "tableFrom": "schedule_role",
           "tableTo": "schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -427,12 +395,8 @@
           "name": "schedule_role_role_id_roles_role_id_fk",
           "tableFrom": "schedule_role",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "role_id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["role_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
