@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { DiscordClient } from "./repositories/discord/client";
-import { InteractionResponseType, verifyKey } from "discord-interactions";
+import {
+  InteractionResponseType,
+  InteractionType,
+  verifyKey,
+} from "discord-interactions";
 import { ScheduleRepository } from "./repositories/d1/schedulesRepository";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./db/schema";
@@ -40,7 +44,7 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
     }
 
     const body = JSON.parse(rawBody);
-    if (body.type === InteractionResponseType.PONG) {
+    if (body.type !== InteractionType.APPLICATION_COMMAND) {
       return c.json({ type: InteractionResponseType.PONG });
     }
 
