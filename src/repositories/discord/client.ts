@@ -15,7 +15,6 @@ export interface IDiscordClient {
   subscribeCommand(
     // @ts-ignore
     commands,
-    appId: string,
     guildId: string,
   ): Promise<void>;
 }
@@ -114,10 +113,9 @@ export class DiscordClient implements IDiscordClient {
     // @ts-ignore
     commands,
     appId: string,
-    guildId: string,
   ): Promise<void> {
     const response = await fetch(
-      `${this.BASE_URL}/applications/${appId}/guilds/${guildId}/commands`,
+      `${this.BASE_URL}/applications/${appId}/commands`,
       {
         method: "POST",
         headers: this.config.headers,

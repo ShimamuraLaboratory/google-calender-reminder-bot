@@ -110,7 +110,7 @@ export class Handlers {
       throw new Error("subscribeService is not initialized");
     }
 
-    await this.subscribeService.subscribeCommand(appId, guildId).catch((e) => {
+    await this.subscribeService.subscribeCommand(guildId).catch((e) => {
       throw new Error(e);
     });
   }
