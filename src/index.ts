@@ -85,7 +85,7 @@ app.all("/subscribe_command", async (c) => {
   await handler
     .handleSubscribeCommand(c.env.DISCORD_APP_ID, c.env.DISCORD_GUILD_ID)
     .catch((err) => {
-      console.error("Error subscribing commands:", err);
+      return c.text(`サブコマンドの登録に失敗しました: ${err.message}`, 500);
     });
 
   return c.text("コマンドの登録が完了しました");
