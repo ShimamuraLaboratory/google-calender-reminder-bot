@@ -39,19 +39,25 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
   async (c, next) => {
     const signature = c.req.header("x-signature-ed25519");
     const timestamp = c.req.header("x-signature-timestamp");
-    const rawBody = await c.req.raw.clone().text();
+    const rawBody = await c.req.raw.arrayBuffer();
 
-    const isValid =
-      signature &&
-      timestamp &&
-      verifyKey(rawBody, signature, timestamp, c.env.DISCORD_PUBLIC_KEY);
-
-    if (!isValid) {
-      return c.text("Invalid request signature", 401);
+    if (!signature || !timestamp) {
+      return c.text("invalid request signature", 401);
     }
 
-    const body = JSON.parse(rawBody);
-    if (body.type !== InteractionType.APPLICATION_COMMAND) {
+    const isValid = await verifyKey(
+      rawBody,
+      signature,
+      timestamp,
+      c.env.DISCORD_PUBLIC_KEY,
+    );
+
+    if (!isValid) {
+      return c.text("invalid request signature", 401);
+    }
+
+    const body = JSON.parse(new TextDecoder("utf-8").decode(rawBody));
+    if (body.type === InteractionType.PING) {
       return c.json({ type: InteractionResponseType.PONG });
     }
 
