@@ -65,6 +65,9 @@ export class FetchServerInfoService implements IFetchServerInfoService {
         const existingMember = existingMembers.find(
           (existingMember) => existingMember.memberId === member.memberId,
         );
+        if (!existingMember) {
+          return;
+        }
 
         const existRoleSet = new Set(
           existingMember?.roles?.map((role) => role.roleId),
