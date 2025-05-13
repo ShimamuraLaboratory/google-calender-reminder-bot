@@ -39,7 +39,7 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
   async (c, next) => {
     const signature = c.req.header("x-signature-ed25519");
     const timestamp = c.req.header("x-signature-timestamp");
-    const rawBody = await c.req.raw.arrayBuffer();
+    const rawBody = await c.req.raw.clone().arrayBuffer();
 
     if (!signature || !timestamp) {
       return c.text("invalid request signature", 401);
@@ -56,8 +56,8 @@ export const verifyMiddleware = createMiddleware<{ Bindings: Bindings }>(
       return c.text("invalid request signature", 401);
     }
 
-    const body = JSON.parse(new TextDecoder("utf-8").decode(rawBody));
-    if (body.type === InteractionType.PING) {
+    const parsedBody = JSON.parse(new TextDecoder("utf-8").decode(rawBody));
+    if (parsedBody.type === InteractionType.PING) {
       return c.json({ type: InteractionResponseType.PONG });
     }
 
@@ -81,10 +81,10 @@ app.post("/", verifyMiddleware, async (c) => {
   );
   const handler = new Handlers(commandService);
 
-  await handler
+  return await handler
     .handleCommand(body)
     .then((response) => {
-      c.json({
+      return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content: response,
@@ -93,7 +93,7 @@ app.post("/", verifyMiddleware, async (c) => {
       });
     })
     .catch((e) => {
-      c.json({
+      return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content: e.message,
