@@ -13,7 +13,10 @@ type SlashCommandObj = APIBaseInteraction<
     name: string;
     options?: {
       name: string;
-      value: string;
+      options?: {
+        name: string;
+        value: string;
+      }[];
     }[];
   }
 >;
@@ -31,8 +34,9 @@ export class Handlers {
   }
 
   async handleCommand(body: SlashCommandObj): Promise<string> {
-    const subCommand = body.data?.name;
-    if (SUB_COMMANDS.has(subCommand || "")) {
+    const subCommand = body.data?.options?.[0]?.name;
+
+    if (!SUB_COMMANDS.has(subCommand || "")) {
       throw new Error("Invalid subcommand");
     }
     if (!this.commandService) {
@@ -41,63 +45,7 @@ export class Handlers {
 
     switch (subCommand) {
       case SUB_COMMAND_ADD: {
-        const title = body.data?.options?.find(
-          (option) => option.name === "title",
-        )?.value;
-        if (!title) {
-          throw new Error("タイトルは必須です");
-        }
-
-        const startAt = body.data?.options?.find(
-          (option) => option.name === "startAt",
-        )?.value;
-        if (!startAt) {
-          throw new Error("開始日時は必須です");
-        }
-
-        const endAt = body.data?.options?.find(
-          (option) => option.name === "endAt",
-        )?.value;
-        if (!endAt) {
-          throw new Error("終了日時は必須です");
-        }
-        if (new Date(startAt) > new Date(endAt)) {
-          throw new Error("終了日時は開始日時よりも後である必要があります");
-        }
-
-        const description = body.data?.options?.find(
-          (option) => option.name === "description",
-        )?.value;
-        const remindDays = body.data?.options?.find(
-          (option) => option.name === "remindDays",
-        )?.value;
-        const memberIds = body.data?.options?.map((option) => {
-          if (option.name.includes("member_")) {
-            return option.value;
-          }
-        });
-        const roleIds = body.data?.options?.map((option) => {
-          if (option.name.includes("role_")) {
-            return option.value;
-          }
-        });
-
-        const scheduleData: AddCommandParams = {
-          scheduleData: {
-            title,
-            startAt,
-            endAt,
-            description,
-            remindDays: Number(remindDays),
-            options: {
-              memberIds: memberIds?.filter(
-                (id) => id !== undefined,
-              ) as string[],
-              roleIds: roleIds?.filter((id) => id !== undefined) as string[],
-            },
-          },
-        };
-
+        const scheduleData = this.handleAddCommandImpl(body);
         const message = await this.commandService
           .addCommandImpl(scheduleData)
           .catch((e) => {
@@ -119,5 +67,84 @@ export class Handlers {
     await this.subscribeService.subscribeCommand(appId, guildId).catch((e) => {
       throw new Error(e);
     });
+  }
+
+  handleAddCommandImpl(body: SlashCommandObj): AddCommandParams {
+    const title = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "title",
+    )?.value;
+    if (!title) {
+      throw new Error("タイトルが指定されていません");
+    }
+
+    const startAt = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "start_at",
+    )?.value;
+    if (!startAt) {
+      throw new Error("開始日時が指定されていません");
+    }
+
+    const endAt = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "end_at",
+    )?.value;
+    if (!endAt) {
+      throw new Error("終了日時が指定されていません");
+    }
+
+    this.validateDate(startAt as string, endAt as string);
+
+    const description = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "description",
+    )?.value;
+    const remindDays = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "remind_days",
+    )?.value;
+    const memberIds = body.data?.options?.[0]?.options?.map((option) => {
+      if (option.name.includes("member_")) {
+        return option.value;
+      }
+    });
+    const roleIds = body.data?.options?.[0]?.options?.map((option) => {
+      if (option.name.includes("role_")) {
+        return option.value;
+      }
+    });
+
+    const scheduleData: AddCommandParams = {
+      scheduleData: {
+        title,
+        startAt,
+        endAt,
+        description,
+        remindDays: Number(remindDays),
+        options: {
+          memberIds: memberIds?.filter((id) => id !== undefined) as string[],
+          roleIds: roleIds?.filter((id) => id !== undefined) as string[],
+        },
+      },
+    };
+
+    return scheduleData;
+  }
+
+  validateDate(startAt: string, endAt: string) {
+    const start = new Date(startAt);
+    const end = new Date(endAt);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new Error("無効な日時が指定されました");
+    }
+
+    if (start >= end) {
+      throw new Error("終了日時は開始日時よりも後である必要があります");
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (start.getFullYear() < currentYear) {
+      throw new Error("開始日時は現在以降である必要があります");
+    }
+    if (end.getFullYear() < currentYear) {
+      throw new Error("終了日時は現在以降である必要があります");
+    }
   }
 }
