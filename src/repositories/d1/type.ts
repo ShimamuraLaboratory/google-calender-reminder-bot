@@ -3,7 +3,6 @@ export type Role = {
   name: string;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
   members?: Member[];
 };
 
@@ -25,8 +24,6 @@ export type Schedule = {
 
 export type Member = {
   memberId: string;
-  lastName: string;
-  firstName: string;
   userName: string;
   createdAt: string;
   updatedAt: string;

@@ -6,6 +6,7 @@ import type {
 } from "discord-api-types/v10";
 import { SUB_COMMAND_ADD, SUB_COMMANDS } from "./constant";
 import type { AddCommandParams } from "./services/commandService.type";
+import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 
 type SlashCommandObj = APIBaseInteraction<
   InteractionType.ApplicationCommand,
@@ -24,13 +25,16 @@ type SlashCommandObj = APIBaseInteraction<
 export class Handlers {
   private commandService: ICommandService | undefined;
   private subscribeService: ISubscribeService | undefined;
+  private fetchServerInfoService: IFetchServerInfoService | undefined;
 
   constructor(
     commandService?: ICommandService,
     subscribeService?: ISubscribeService,
+    fetchServerInfoService?: IFetchServerInfoService,
   ) {
     this.commandService = commandService;
     this.subscribeService = subscribeService;
+    this.fetchServerInfoService = fetchServerInfoService;
   }
 
   async handleCommand(body: SlashCommandObj): Promise<string> {
@@ -125,6 +129,26 @@ export class Handlers {
     };
 
     return scheduleData;
+  }
+
+  async handleFetchMemberInfo(guildId: string): Promise<void> {
+    if (!this.fetchServerInfoService) {
+      throw new Error("fetchServerInfoService is not initialized");
+    }
+
+    await this.fetchServerInfoService.fetchMembers(guildId).catch((e) => {
+      throw new Error(`Failed to fetch group members: ${e}`);
+    });
+  }
+
+  async handleFetchRoleInfo(guildId: string): Promise<void> {
+    if (!this.fetchServerInfoService) {
+      throw new Error("fetchServerInfoService is not initialized");
+    }
+
+    await this.fetchServerInfoService.fetchRoles(guildId).catch((e) => {
+      throw new Error(`Failed to fetch group roles: ${e}`);
+    });
   }
 
   validateDate(startAt: string, endAt: string) {

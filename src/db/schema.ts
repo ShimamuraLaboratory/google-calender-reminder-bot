@@ -6,13 +6,10 @@ export const roles = table("roles", {
   name: text("name").notNull(),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
-  deletedAt: text("deleted_at"),
 });
 
 export const members = table("members", {
   memberId: text("member_id").primaryKey(),
-  lastName: text("last_name").notNull(),
-  firstName: text("first_name").notNull(),
   userName: text("user_name").notNull(),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),

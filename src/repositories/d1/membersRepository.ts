@@ -8,14 +8,21 @@ export interface IMemberRepository {
   findById(id: string): Promise<Member | undefined>;
   findByIds(ids: string[]): Promise<Member[]>;
   findByRoles(roleId: string[]): Promise<Member[]>;
-  insert(
-    data: Omit<Member, "createdAt" | "updatedAt" | "deletedAt">,
-    roleIds?: string[],
+  insert(data: {
+    memberId: string;
+    userName: string;
+    roles?: string[];
+  }): Promise<void>;
+  bulkInsert(
+    data: { memberId: string; userName: string; roles?: string[] }[],
   ): Promise<void>;
-  update(
-    id: string,
-    data: Omit<Member, "createdAt" | "updatedAt" | "deletedAt">,
-    newRoleIds?: string[],
+  update(data: {
+    memberId: string;
+    userName: string;
+    roles?: string[];
+  }): Promise<void>;
+  bulkUpdate(
+    data: { memberId: string; userName: string; roles?: string[] }[],
   ): Promise<void>;
   delete(id: string): Promise<void>;
 }
@@ -101,13 +108,19 @@ export class MemberRepository
     return formattedRes;
   }
 
-  // NOTE: roleIdを引数に持たせることでロールを指定する挿入も可能
-  async insert(
-    data: Omit<Member, "createdAt" | "updatedAt" | "deletedAt">,
-    roleIds?: string[],
-  ): Promise<void> {
+  /**
+   * メンバーをDBに挿入する
+   *
+   * @param data
+   */
+  async insert(data: {
+    memberId: string;
+    userName: string;
+    roles?: string[];
+  }): Promise<void> {
     const formattedData = {
-      ...data,
+      memberId: data.memberId,
+      userName: data.userName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: null,
@@ -116,65 +129,128 @@ export class MemberRepository
     await this.db.insert(members).values(formattedData).execute();
 
     // NOTE: roleIdが指定されている場合はroleMemberテーブルにも挿入->roleとのリレーション構築
-    if (roleIds) {
-      const datas = roleIds.map((roleId) => ({
+    if (data.roles) {
+      const roleMemberData = data.roles.map((roleId) => ({
         roleId,
         memberId: data.memberId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
-
-      await this.db.insert(roleMember).values(datas).execute();
+      await this.db.insert(roleMember).values(roleMemberData).execute();
     }
   }
 
-  async update(
-    id: string,
-    data: Omit<Member, "createdAt" | "updatedAt" | "deletedAt">,
-    newRoleIds?: string[],
+  /**
+   * 複数のメンバーをDBに挿入する
+   *
+   * @param data
+   */
+  async bulkInsert(
+    data: { memberId: string; userName: string; roles?: string[] }[],
   ): Promise<void> {
+    const formattedData = data.map((member) => ({
+      memberId: member.memberId,
+      userName: member.userName,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      deletedAt: null,
+    }));
+
+    await this.db.insert(members).values(formattedData).execute();
+
+    // NOTE: roleIdが指定されている場合はroleMemberテーブルにも挿入->roleとのリレーション構築
+    const roleMemberData = data.map((member) => {
+      if (member.roles) {
+        return member.roles.map((roleId) => ({
+          roleId,
+          memberId: member.memberId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+      }
+      return [];
+    });
+
+    const flattenedRoleMemberData = roleMemberData.flat();
+    if (flattenedRoleMemberData.length > 0) {
+      await this.db
+        .insert(roleMember)
+        .values(flattenedRoleMemberData)
+        .execute();
+    }
+  }
+
+  /**
+   * メンバーデータの更新
+   *
+   * @param data
+   */
+  async update(data: {
+    memberId: string;
+    userName: string;
+    roles?: string[];
+  }): Promise<void> {
     await this.db
       .update(members)
       .set(data)
-      .where(eq(members.memberId, id))
+      .where(eq(members.memberId, data.memberId))
       .execute();
 
-    if (newRoleIds) {
-      const oldRoles = await this.db.query.roleMember.findMany({
-        where: (roleMember, { eq }) => eq(roleMember.memberId, id),
-      });
-
-      const oldRoleIds = oldRoles.map((role) => role.roleId);
-      const newRoleIdsSet = new Set(newRoleIds);
-      const oldRoleIdsSet = new Set(oldRoleIds);
-      const roleIdsToAdd = newRoleIds.filter(
-        (roleId) => !oldRoleIdsSet.has(roleId),
-      );
-      const roleIdsToDelete = oldRoleIds.filter(
-        (roleId) => !newRoleIdsSet.has(roleId),
-      );
-
-      const datasToAdd = roleIdsToAdd.map((roleId) => ({
+    // NOTE: 中間テーブルの更新
+    if (data.roles) {
+      await this.db
+        .delete(roleMember)
+        .where(eq(roleMember.memberId, data.memberId))
+        .execute();
+      const roleMemberData = data.roles.map((roleId) => ({
         roleId,
-        memberId: id,
+        memberId: data.memberId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
+      await this.db.insert(roleMember).values(roleMemberData).execute();
+    }
+  }
 
-      // NOTE: 中間テーブルの更新
-      if (datasToAdd.length > 0) {
-        await this.db.insert(roleMember).values(datasToAdd).execute();
-      }
-      if (roleIdsToDelete.length > 0) {
+  /**
+   * 複数のメンバーデータの更新
+   * TODO: n+1問題が発生しているので時間がある時修正
+   *
+   * @param data
+   */
+  async bulkUpdate(
+    data: { memberId: string; userName: string; roles?: string[] }[],
+  ): Promise<void> {
+    const memberIds = data.map((member) => member.memberId);
+
+    const formattedData = data.map((member) => ({
+      userName: member.userName,
+      updatedAt: new Date().toISOString(),
+      deletedAt: null,
+    }));
+
+    await formattedData.forEach(async (member, index) => {
+      await this.db
+        .update(members)
+        .set(member)
+        .where(eq(members.memberId, memberIds[index]))
+        .execute();
+    });
+
+    // NOTE: 中間テーブルの更新
+    for (const member of data) {
+      if (member.roles) {
         await this.db
           .delete(roleMember)
-          .where(
-            and(
-              eq(roleMember.memberId, id),
-              inArray(roleMember.roleId, roleIdsToDelete),
-            ),
-          )
+          .where(eq(roleMember.memberId, member.memberId))
           .execute();
+        const roleMemberData = member.roles.map((roleId) => ({
+          roleId,
+          memberId: member.memberId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+        await this.db.insert(roleMember).values(roleMemberData).execute();
       }
     }
   }

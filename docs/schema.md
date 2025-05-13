@@ -14,8 +14,6 @@ erDiagram
 
     members {
         text member_id PK "Discordのmember_idをそのまま使用"
-        text last_name "名前"
-        text first_name "苗字"
         text user_name "Discordのユーザー名"
         text created_at
         text updated_at
