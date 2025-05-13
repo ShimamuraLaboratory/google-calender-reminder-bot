@@ -70,14 +70,11 @@ app.post("/", verifyMiddleware, async (c) => {
 
   const db = drizzle(c.env.D1_DATABASE, { schema: schema });
 
-  const discordClient = new DiscordClient(c.env.DISCORD_BOT_TOKEN);
   const googleCalendarClient = new GoogleCalendarClient();
   const scheduleRepository = new ScheduleRepository(db);
   const commandService = new CommandService(
     scheduleRepository,
-    discordClient,
     googleCalendarClient,
-    c.env.REMINDER_CHANNEL_ID,
   );
   const handler = new Handlers(commandService);
 
@@ -103,18 +100,10 @@ app.post("/", verifyMiddleware, async (c) => {
     });
 });
 
-app.all("/subscribe_command", async (c) => {
-  const db = drizzle(c.env.D1_DATABASE, { schema: schema });
-
+app.patch("/subscribe_command", async (c) => {
   const discordClient = new DiscordClient(c.env.DISCORD_BOT_TOKEN);
-  const roleRepository = new RoleRepository(db);
-  const memberRepository = new MemberRepository(db);
 
-  const subscribeService = new SubscribeService(
-    discordClient,
-    roleRepository,
-    memberRepository,
-  );
+  const subscribeService = new SubscribeService(discordClient);
 
   const handler = new Handlers(undefined, subscribeService);
 

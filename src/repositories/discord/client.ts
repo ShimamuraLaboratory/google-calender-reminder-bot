@@ -1,3 +1,4 @@
+import { COMMANDS } from "@/lib/commandSubscription";
 import type {
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
@@ -8,12 +9,7 @@ import type {
 export interface IDiscordClient {
   fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
   fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
-  subscribeCommand(
-    // @ts-ignore
-    commands,
-    appId: string,
-    guildId: string,
-  ): Promise<void>;
+  subscribeCommand(appId: string, guildId: string): Promise<void>;
 }
 
 export class DiscordClient implements IDiscordClient {
@@ -79,25 +75,18 @@ export class DiscordClient implements IDiscordClient {
    * @param guildId
    * @returns
    */
-  async subscribeCommand(
-    // @ts-ignore
-    commands,
-    appId: string,
-    guildId: string,
-  ): Promise<void> {
+  async subscribeCommand(appId: string, guildId: string): Promise<void> {
     const response = await fetch(
       `${this.BASE_URL}/applications/${appId}/commands`,
       {
         method: "POST",
         headers: this.config.headers,
-        body: JSON.stringify(commands),
+        body: JSON.stringify(COMMANDS),
       },
     );
 
-    if (response.status !== 200) {
+    if (response.status !== 201) {
       throw new Error("コマンドの登録に失敗しました");
     }
-
-    return;
   }
 }

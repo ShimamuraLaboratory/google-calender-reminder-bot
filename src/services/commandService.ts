@@ -12,20 +12,13 @@ export interface ICommandService {
 
 export class CommandService implements ICommandService {
   private scheduleRepository: IScheduleRepository;
-  private discordClient: IDiscordClient;
   private googleCalendarClient: IGoogleCalendarClient;
-  private channelId: string;
-
   constructor(
     scheduleRepository: IScheduleRepository,
-    discordClient: IDiscordClient,
     googleCalendarClient: IGoogleCalendarClient,
-    channelId: string,
   ) {
     this.scheduleRepository = scheduleRepository;
-    this.discordClient = discordClient;
     this.googleCalendarClient = googleCalendarClient;
-    this.channelId = channelId;
   }
 
   async addCommandImpl(params: AddCommandParams): Promise<string> {
