@@ -36,10 +36,13 @@ export class DiscordClient implements IDiscordClient {
   async fetchGuildMembers(
     guildId: string,
   ): Promise<RESTGetAPIGuildMembersResult> {
-    const response = await fetch(`${this.BASE_URL}/guilds/${guildId}/members`, {
-      method: "GET",
-      headers: this.config.headers,
-    });
+    const response = await fetch(
+      `${this.BASE_URL}/guilds/${guildId}/members?limit=1000`,
+      {
+        method: "GET",
+        headers: this.config.headers,
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch group members: ${response.statusText}`);
