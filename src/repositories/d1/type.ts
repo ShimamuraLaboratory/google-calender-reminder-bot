@@ -25,6 +25,7 @@ export type Schedule = {
 export type Member = {
   memberId: string;
   userName: string;
+  nickName: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
