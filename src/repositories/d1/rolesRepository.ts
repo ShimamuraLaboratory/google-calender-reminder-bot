@@ -1,7 +1,7 @@
 import type { Role } from "./type";
 import { roleMember, roles, scheduleRole } from "@/db/schema";
 import BaseRepository from "./baseRepository";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 // TODO: any型は排除する (2025/04/29)
 export interface IRoleRepository {
@@ -9,19 +9,18 @@ export interface IRoleRepository {
   findById(id: string): Promise<Role | undefined>;
   findByIds(ids: string[]): Promise<Role[]>;
   insert(
-    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">,
+    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">[],
   ): Promise<void>;
   update(
     id: string,
     data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">,
   ): Promise<void>;
-  delete(id: string): Promise<void>;
+  delete(id: string[]): Promise<void>;
 }
 
 export class RoleRepository extends BaseRepository implements IRoleRepository {
   async findAll(): Promise<Role[]> {
     const res = await this.db.query.roles.findMany({
-      where: (roles, { isNull }) => isNull(roles.deletedAt),
       with: {
         roleMembers: {
           with: {
@@ -99,14 +98,14 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
   }
 
   async insert(
-    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">,
+    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">[],
   ): Promise<void> {
-    const formattedData = {
-      ...data,
+    const formattedData = data.map((role) => ({
+      ...role,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: null,
-    };
+    }));
 
     await this.db.insert(roles).values(formattedData).execute();
   }
@@ -118,20 +117,18 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
     await this.db.update(roles).set(data).where(eq(roles.roleId, id)).execute();
   }
 
-  async delete(id: string): Promise<void> {
-    // NOTE: 論理削除
-    await this.db
-      .update(roles)
-      .set({ deletedAt: new Date().toISOString() })
-      .where(eq(roles.roleId, id))
-      .execute();
+  async delete(id: string[]): Promise<void> {
+    await this.db.delete(roles).where(inArray(roles.roleId, id)).execute();
 
     // NOTE: 中間テーブルの削除
-    await this.db.delete(roleMember).where(eq(roleMember.roleId, id)).execute();
+    await this.db
+      .delete(roleMember)
+      .where(inArray(roleMember.roleId, id))
+      .execute();
 
     await this.db
       .delete(scheduleRole)
-      .where(eq(scheduleRole.roleId, id))
+      .where(inArray(scheduleRole.roleId, id))
       .execute();
   }
 }
