@@ -35,6 +35,7 @@ export class FetchServerInfoService implements IFetchServerInfoService {
           return {
             memberId: member.user.id,
             userName: member.user.username,
+            nickName: member.nick || member.user.global_name,
             roles: member.roles,
           };
         }
@@ -42,6 +43,7 @@ export class FetchServerInfoService implements IFetchServerInfoService {
       .filter((member) => member !== undefined) as {
       memberId: string;
       userName: string;
+      nickName: string | null;
       roles: string[];
     }[];
 
@@ -63,6 +65,9 @@ export class FetchServerInfoService implements IFetchServerInfoService {
         const existingMember = existingMembers.find(
           (existingMember) => existingMember.memberId === member.memberId,
         );
+        if (!existingMember) {
+          return;
+        }
 
         const existRoleSet = new Set(
           existingMember?.roles?.map((role) => role.roleId),
@@ -71,7 +76,11 @@ export class FetchServerInfoService implements IFetchServerInfoService {
         const newRoleSet = new Set(member.roles);
         const diff = [...newRoleSet].filter((role) => !existRoleSet.has(role));
 
-        if (diff.length > 0) {
+        const isDiffMemberInfo =
+          existingMember?.userName !== member.userName ||
+          existingMember?.nickName !== member.nickName;
+
+        if (diff.length > 0 || isDiffMemberInfo) {
           return {
             ...member,
             roles: diff,
@@ -81,6 +90,7 @@ export class FetchServerInfoService implements IFetchServerInfoService {
       .filter((member) => member !== undefined) as {
       memberId: string;
       userName: string;
+      nickName: string | null;
       roles: string[];
     }[];
 

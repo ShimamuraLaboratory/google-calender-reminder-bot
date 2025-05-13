@@ -247,23 +247,28 @@ export class MemberRepository
    * @param data
    */
   async bulkUpdate(
-    data: { memberId: string; userName: string; roles?: string[] }[],
+    data: {
+      memberId: string;
+      userName: string;
+      nickName: string;
+      roles?: string[];
+    }[],
   ): Promise<void> {
-    const memberIds = data.map((member) => member.memberId);
-
     const formattedData = data.map((member) => ({
+      memberId: member.memberId,
       userName: member.userName,
+      nickName: member.nickName,
       updatedAt: new Date().toISOString(),
       deletedAt: null,
     }));
 
-    await formattedData.forEach(async (member, index) => {
+    for (const member of formattedData) {
       await this.db
         .update(members)
         .set(member)
-        .where(eq(members.memberId, memberIds[index]))
+        .where(eq(members.memberId, member.memberId))
         .execute();
-    });
+    }
 
     // NOTE: 中間テーブルの更新
     for (const member of data) {
