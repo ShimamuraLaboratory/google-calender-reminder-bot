@@ -11,18 +11,30 @@ export interface IMemberRepository {
   insert(data: {
     memberId: string;
     userName: string;
+    nickName?: string | null;
     roles?: string[];
   }): Promise<void>;
   bulkInsert(
-    data: { memberId: string; userName: string; roles?: string[] }[],
+    data: {
+      memberId: string;
+      userName: string;
+      nickName?: string | null;
+      roles?: string[];
+    }[],
   ): Promise<void>;
   update(data: {
     memberId: string;
     userName: string;
+    nickName?: string | null;
     roles?: string[];
   }): Promise<void>;
   bulkUpdate(
-    data: { memberId: string; userName: string; roles?: string[] }[],
+    data: {
+      memberId: string;
+      userName: string;
+      nickName?: string | null;
+      roles?: string[];
+    }[],
   ): Promise<void>;
   delete(id: string[]): Promise<void>;
 }
@@ -116,11 +128,13 @@ export class MemberRepository
   async insert(data: {
     memberId: string;
     userName: string;
+    nickName?: string | null;
     roles?: string[];
   }): Promise<void> {
     const formattedData = {
       memberId: data.memberId,
       userName: data.userName,
+      nickName: data.nickName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: null,
@@ -133,6 +147,7 @@ export class MemberRepository
       const roleMemberData = data.roles.map((roleId) => ({
         roleId,
         memberId: data.memberId,
+        nickName: data.nickName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
@@ -146,11 +161,17 @@ export class MemberRepository
    * @param data
    */
   async bulkInsert(
-    data: { memberId: string; userName: string; roles?: string[] }[],
+    data: {
+      memberId: string;
+      userName: string;
+      nickName?: string | null;
+      roles?: string[];
+    }[],
   ): Promise<void> {
     const formattedData = data.map((member) => ({
       memberId: member.memberId,
       userName: member.userName,
+      nickName: member.nickName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: null,
@@ -194,6 +215,7 @@ export class MemberRepository
   async update(data: {
     memberId: string;
     userName: string;
+    nickName?: string | null;
     roles?: string[];
   }): Promise<void> {
     await this.db

@@ -11,6 +11,7 @@ export const roles = table("roles", {
 export const members = table("members", {
   memberId: text("member_id").primaryKey(),
   userName: text("user_name").notNull(),
+  nickName: text("nick_name"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
   deletedAt: text("deleted_at"),

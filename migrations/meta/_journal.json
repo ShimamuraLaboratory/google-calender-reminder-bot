@@ -50,6 +50,13 @@
       "when": 1747137997559,
       "tag": "0006_stiff_bulldozer",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1747148324346,
+      "tag": "0007_smiling_mole_man",
+      "breakpoints": true
     }
   ]
 }
