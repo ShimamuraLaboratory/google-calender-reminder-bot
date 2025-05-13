@@ -36,6 +36,20 @@
       "when": 1746975053100,
       "tag": "0004_dusty_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1747136459029,
+      "tag": "0005_odd_mephistopheles",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1747137997559,
+      "tag": "0006_stiff_bulldozer",
+      "breakpoints": true
     }
   ]
 }

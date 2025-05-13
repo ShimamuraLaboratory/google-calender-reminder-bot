@@ -1,0 +1,1 @@
+ALTER TABLE `roles` DROP COLUMN `deleted_at`;

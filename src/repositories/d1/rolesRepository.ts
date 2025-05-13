@@ -46,8 +46,7 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
 
   async findById(id: string): Promise<Role | undefined> {
     const res = await this.db.query.roles.findFirst({
-      where: (roles, { and, isNull, eq }) =>
-        and(eq(roles.roleId, id), isNull(roles.deletedAt)),
+      where: (roles, { eq }) => eq(roles.roleId, id),
       with: {
         roleMembers: {
           with: {
@@ -66,7 +65,6 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
       name: res.name,
       createdAt: res.createdAt,
       updatedAt: res.updatedAt,
-      deletedAt: res.deletedAt,
       members: res.roleMembers.map((roleMember) => ({
         ...roleMember.member,
       })),
@@ -77,8 +75,7 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
 
   async findByIds(ids: string[]): Promise<Role[]> {
     const res = await this.db.query.roles.findMany({
-      where: (roles, { and, isNull, inArray }) =>
-        and(inArray(roles.roleId, ids), isNull(roles.deletedAt)),
+      where: (roles, { inArray }) => inArray(roles.roleId, ids),
       with: {
         roleMembers: {
           with: {
