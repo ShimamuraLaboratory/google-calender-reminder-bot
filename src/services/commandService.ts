@@ -1,5 +1,4 @@
 import type { IGoogleCalendarClient } from "@/repositories/google/cient";
-import type { IDiscordClient } from "@/repositories/discord/client";
 import type { IScheduleRepository } from "@/repositories/d1/schedulesRepository";
 import type { AddCommandParams } from "./commandService.type";
 import { embeddedMessage } from "@/lib/embeddedMessage";
@@ -36,7 +35,7 @@ export class CommandService implements ICommandService {
         description: params.scheduleData.description,
       })
       .catch((e) => {
-        throw new Error("Googleカレンダーのイベント作成に失敗しました");
+        throw new Error(`Googleカレンダーのイベント作成に失敗しました: ${e}`);
       });
 
     const scheduleId = uuid();
@@ -56,7 +55,7 @@ export class CommandService implements ICommandService {
         params.scheduleData.options?.roleIds,
       )
       .catch((e) => {
-        throw new Error("イベントデータの挿入に失敗しました");
+        throw new Error(`イベントデータの挿入に失敗しました: ${e}`);
       });
 
     // const eventId = newEvent.id;

@@ -117,10 +117,16 @@ export class ScheduleRepository
       deletedAt: null,
     };
 
-    await this.db.insert(schedules).values(formattedData).execute();
+    await this.db
+      .insert(schedules)
+      .values(formattedData)
+      .execute()
+      .catch((e) => {
+        throw new Error(e);
+      });
 
     // NOTE: roleとスケジュールを紐づけ
-    if (roleIds) {
+    if (roleIds && roleIds.length > 0) {
       const formattedScheduleRole = roleIds.map((roleId) => ({
         roleId,
         scheduleId: formattedData.id,
@@ -130,11 +136,14 @@ export class ScheduleRepository
       await this.db
         .insert(scheduleRole)
         .values(formattedScheduleRole)
-        .execute();
+        .execute()
+        .catch((e) => {
+          throw new Error(e);
+        });
     }
 
     // NOTE: ユーザーとスケジュールを紐づけ
-    if (memberIds) {
+    if (memberIds && memberIds.length > 0) {
       const formattedScheduleMember = memberIds.map((memberId) => ({
         memberId,
         scheduleId: formattedData.id,
@@ -144,7 +153,10 @@ export class ScheduleRepository
       await this.db
         .insert(scheduleMember)
         .values(formattedScheduleMember)
-        .execute();
+        .execute()
+        .catch((e) => {
+          throw new Error(e);
+        });
     }
   }
 
