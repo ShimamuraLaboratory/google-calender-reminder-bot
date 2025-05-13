@@ -29,11 +29,22 @@ export class FetchServerInfoService implements IFetchServerInfoService {
         throw new Error(`Failed to fetch group members: ${e}`);
       });
 
-    const memberData = members.map((member) => ({
-      memberId: member.user.id,
-      userName: member.user.username,
-      roles: member.roles,
-    }));
+    const memberData = members
+      .map((member) => {
+        if (!member.user.bot) {
+          return {
+            memberId: member.user.id,
+            userName: member.user.username,
+            roles: member.roles,
+          };
+        }
+      })
+      .filter((member) => member !== undefined) as {
+      memberId: string;
+      userName: string;
+      roles: string[];
+    }[];
+
     const existingMembers = await this.memberRepository
       .findByIds(memberData.map((member) => member.memberId))
       .catch((e) => {
@@ -73,13 +84,41 @@ export class FetchServerInfoService implements IFetchServerInfoService {
       roles: string[];
     }[];
 
-    await this.memberRepository.bulkInsert(memberToInsert).catch((e) => {
-      throw new Error(`Failed to insert group members: ${e}`);
-    });
+    const deletedMembers = existingMembers.filter(
+      (existingMember) =>
+        !memberData.some(
+          (member) => member.memberId === existingMember.memberId,
+        ),
+    );
 
-    await this.memberRepository.bulkUpdate(memberToUpdate).catch((e) => {
-      throw new Error(`Failed to update group members: ${e}`);
-    });
+    if (memberToInsert.length > 0) {
+      // NOTE: sqliteでは100以上の変数を一度にバインドできないのでいくつかのチャンクに分けて挿入する
+      const chunkSize = 10;
+      const chunks = [];
+      for (let i = 0; i < memberToInsert.length; i += chunkSize) {
+        chunks.push(memberToInsert.slice(i, i + chunkSize));
+      }
+
+      for (const chunk of chunks) {
+        await this.memberRepository.bulkInsert(chunk).catch((e) => {
+          throw new Error(`Failed to insert group members: ${e}`);
+        });
+      }
+    }
+
+    if (memberToUpdate.length > 0) {
+      await this.memberRepository.bulkUpdate(memberToUpdate).catch((e) => {
+        throw new Error(`Failed to update group members: ${e}`);
+      });
+    }
+
+    if (deletedMembers.length > 0) {
+      await this.memberRepository
+        .delete(deletedMembers.map((member) => member.memberId))
+        .catch((e) => {
+          throw new Error(`Failed to delete group members: ${e}`);
+        });
+    }
   }
 
   async fetchRoles(guildId: string): Promise<void> {
@@ -112,8 +151,44 @@ export class FetchServerInfoService implements IFetchServerInfoService {
         ),
     );
 
-    await this.roleRepository.insert(roleToInsert).catch((e) => {
-      throw new Error(`Failed to insert group roles: ${e}`);
-    });
+    const roleToUpdate = roleData
+      .map((role) => {
+        const existingRole = existingRoles.find(
+          (existingRole) => existingRole.roleId === role.roleId,
+        );
+
+        if (existingRole && existingRole.name !== role.name) {
+          return {
+            ...role,
+            name: role.name,
+          };
+        }
+      })
+      .filter((role) => role !== undefined) as {
+      roleId: string;
+      name: string;
+    }[];
+
+    if (roleToInsert.length > 0) {
+      await this.roleRepository.insert(roleToInsert).catch((e) => {
+        throw new Error(`Failed to insert group roles: ${e}`);
+      });
+    }
+    if (deletedRoles.length > 0) {
+      await this.roleRepository
+        .delete(deletedRoles.map((role) => role.roleId))
+        .catch((e) => {
+          throw new Error(`Failed to delete group roles: ${e}`);
+        });
+    }
+
+    // TODO: n+1になっているので後で修正
+    if (roleToUpdate.length > 0) {
+      for (const role of roleToUpdate) {
+        await this.roleRepository.update(role.roleId, role).catch((e) => {
+          throw new Error(`Failed to update group roles: ${e}`);
+        });
+      }
+    }
   }
 }
