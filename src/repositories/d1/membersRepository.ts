@@ -24,7 +24,7 @@ export interface IMemberRepository {
   bulkUpdate(
     data: { memberId: string; userName: string; roles?: string[] }[],
   ): Promise<void>;
-  delete(id: string): Promise<void>;
+  delete(id: string[]): Promise<void>;
 }
 
 export class MemberRepository
@@ -159,17 +159,23 @@ export class MemberRepository
     await this.db.insert(members).values(formattedData).execute();
 
     // NOTE: roleIdが指定されている場合はroleMemberテーブルにも挿入->roleとのリレーション構築
-    const roleMemberData = data.map((member) => {
-      if (member.roles) {
-        return member.roles.map((roleId) => ({
-          roleId,
-          memberId: member.memberId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
-      }
-      return [];
-    });
+    const roleMemberData = data
+      .map((member) => {
+        if (member.roles) {
+          return member.roles.map((roleId) => ({
+            roleId,
+            memberId: member.memberId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
+        }
+      })
+      .filter((member) => member !== undefined) as {
+      roleId: string;
+      memberId: string;
+      createdAt: string;
+      updatedAt: string;
+    }[][];
 
     const flattenedRoleMemberData = roleMemberData.flat();
     if (flattenedRoleMemberData.length > 0) {
@@ -244,39 +250,41 @@ export class MemberRepository
           .delete(roleMember)
           .where(eq(roleMember.memberId, member.memberId))
           .execute();
-        const roleMemberData = member.roles.map((roleId) => ({
-          roleId,
-          memberId: member.memberId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
-        await this.db.insert(roleMember).values(roleMemberData).execute();
+        if (member.roles.length > 0) {
+          const roleMemberData = member.roles.map((roleId) => ({
+            roleId,
+            memberId: member.memberId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
+          await this.db.insert(roleMember).values(roleMemberData).execute();
+        }
       }
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(ids: string[]): Promise<void> {
     // NOTE: 論理削除
     await this.db
       .update(members)
       .set({ deletedAt: new Date().toISOString() })
-      .where(eq(members.memberId, id))
+      .where(inArray(members.memberId, ids))
       .execute();
 
     // NOTE: 中間テーブルも削除
     await this.db
       .delete(roleMember)
-      .where(eq(roleMember.memberId, id))
+      .where(inArray(roleMember.memberId, ids))
       .execute();
 
     await this.db
       .delete(scheduleMember)
-      .where(eq(scheduleMember.memberId, id))
+      .where(inArray(scheduleMember.memberId, ids))
       .execute();
 
     await this.db
       .delete(remindMember)
-      .where(eq(remindMember.memberId, id))
+      .where(inArray(remindMember.memberId, ids))
       .execute();
   }
 }
