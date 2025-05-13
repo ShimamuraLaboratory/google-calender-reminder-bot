@@ -94,7 +94,7 @@ export class DiscordClient implements IDiscordClient {
       },
     );
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error("コマンドの登録に失敗しました");
     }
 
