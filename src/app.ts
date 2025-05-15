@@ -3,6 +3,7 @@ import { createMiddleware } from "hono/factory";
 import { DiscordClient } from "./infra/repositories/discord/client";
 import {
   InteractionResponseType,
+  InteractionResponseFlags,
   InteractionType,
   verifyKey,
 } from "discord-interactions";
@@ -74,8 +75,8 @@ app.post("/", verifyMiddleware, async (c) => {
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: response,
-          flags: 64,
+          embeds: response.embeds,
+          flags: InteractionResponseFlags.EPHEMERAL,
         },
       });
     })
@@ -83,8 +84,8 @@ app.post("/", verifyMiddleware, async (c) => {
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: e.message,
-          flags: 64,
+          content: `コマンドの実行に失敗しました: ${e.message}`,
+          flags: InteractionResponseFlags.EPHEMERAL,
         },
       });
     });
