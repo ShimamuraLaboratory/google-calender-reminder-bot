@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
-import { DiscordClient } from "./repositories/discord/client";
+import { DiscordClient } from "./infra/repositories/discord/client";
 import {
   InteractionResponseType,
   InteractionType,
   verifyKey,
 } from "discord-interactions";
-import { ScheduleRepository } from "./repositories/d1/schedulesRepository";
+import { ScheduleRepository } from "./infra/repositories/d1/schedulesRepository";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./db/schema";
 import { CommandService } from "./services/commandService";
-import { GoogleCalendarClient } from "./repositories/google/cient";
+import { GoogleCalendarClient } from "./infra/repositories/google/cient";
 import { Handlers } from "./handler";
 import { SubscribeService } from "./services/subscribeService";
 

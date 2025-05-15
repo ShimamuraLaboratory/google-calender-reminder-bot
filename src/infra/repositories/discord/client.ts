@@ -1,16 +1,9 @@
+import type { IDiscordClient } from "@/repositories/discord";
 import { COMMANDS } from "@/lib/commandSubscription";
 import type {
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
-  RESTPostAPIChannelMessageJSONBody,
-  RESTPostAPIChannelMessageResult,
 } from "discord-api-types/v10";
-
-export interface IDiscordClient {
-  fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
-  fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
-  subscribeCommand(appId: string, guildId: string): Promise<void>;
-}
 
 export class DiscordClient implements IDiscordClient {
   private BASE_URL = "https://discord.com/api/v10";

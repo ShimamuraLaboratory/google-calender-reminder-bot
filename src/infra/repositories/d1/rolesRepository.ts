@@ -1,22 +1,8 @@
-import type { Role } from "./type";
+import type { Role } from "../../../repositories/type";
 import { roleMember, roles, scheduleRole } from "@/db/schema";
 import BaseRepository from "./baseRepository";
-import { and, eq, inArray } from "drizzle-orm";
-
-// TODO: any型は排除する (2025/04/29)
-export interface IRoleRepository {
-  findAll(): Promise<Role[]>;
-  findById(id: string): Promise<Role | undefined>;
-  findByIds(ids: string[]): Promise<Role[]>;
-  insert(
-    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">[],
-  ): Promise<void>;
-  update(
-    id: string,
-    data: Omit<Role, "createdAt" | "updatedAt" | "deletedAt">,
-  ): Promise<void>;
-  delete(id: string[]): Promise<void>;
-}
+import { eq, inArray } from "drizzle-orm";
+import type { IRoleRepository } from "@/repositories/roles";
 
 export class RoleRepository extends BaseRepository implements IRoleRepository {
   async findAll(): Promise<Role[]> {

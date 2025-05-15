@@ -1,4 +1,4 @@
-import type { IDiscordClient } from "@/repositories/discord/client";
+import type { IDiscordClient } from "@/repositories/discord";
 
 export interface ISubscribeService {
   subscribeCommand(appId: string, guildId: string): Promise<void>;

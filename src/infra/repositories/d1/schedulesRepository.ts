@@ -1,24 +1,8 @@
-import type { Schedule } from "./type";
+import type { Schedule } from "../../../repositories/type";
 import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { and, eq, inArray } from "drizzle-orm";
-
-export interface IScheduleRepository {
-  findByEventId(id: string): Promise<Schedule | undefined>;
-  findByRoleIds(roleIds: string[]): Promise<Schedule[]>;
-  insert(
-    data: Omit<Schedule, "createdAt" | "updatedAt" | "deletedAt">,
-    memberIds?: string[],
-    roleIds?: string[],
-  ): Promise<void>;
-  update(
-    id: string,
-    data: Omit<Schedule, "createdAt" | "updatedAt" | "deletedAt">,
-    memberIds?: string[],
-    roleIds?: string[],
-  ): Promise<void>;
-  delete(id: string): Promise<void>;
-}
+import type { IScheduleRepository } from "@/repositories/schedules";
 
 export class ScheduleRepository
   extends BaseRepository

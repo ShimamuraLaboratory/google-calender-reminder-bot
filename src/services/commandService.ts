@@ -1,5 +1,5 @@
-import type { IGoogleCalendarClient } from "@/repositories/google/cient";
-import type { IScheduleRepository } from "@/repositories/d1/schedulesRepository";
+import type { ICalendarClient } from "@/repositories/calendar";
+import type { IScheduleRepository } from "@/repositories/schedules";
 import type { AddCommandParams } from "./commandService.type";
 import { embeddedMessage } from "@/lib/embeddedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
@@ -11,17 +11,17 @@ export interface ICommandService {
 
 export class CommandService implements ICommandService {
   private scheduleRepository: IScheduleRepository;
-  private googleCalendarClient: IGoogleCalendarClient;
+  private calendarClient: ICalendarClient;
   constructor(
     scheduleRepository: IScheduleRepository,
-    googleCalendarClient: IGoogleCalendarClient,
+    calendarClient: ICalendarClient,
   ) {
     this.scheduleRepository = scheduleRepository;
-    this.googleCalendarClient = googleCalendarClient;
+    this.calendarClient = calendarClient;
   }
 
   async addCommandImpl(params: AddCommandParams): Promise<string> {
-    const newEvent = await this.googleCalendarClient
+    const newEvent = await this.calendarClient
       .createEvent({
         summary: params.scheduleData.title,
         start: {
