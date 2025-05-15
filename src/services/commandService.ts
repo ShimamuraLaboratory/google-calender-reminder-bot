@@ -1,10 +1,23 @@
 import type { ICalendarClient } from "@/repositories/calendar";
 import type { IScheduleRepository } from "@/repositories/schedules";
-import type { AddCommandParams } from "./commandService.type";
-import { embeddedMessage } from "@/lib/embeddedMessage";
+import { embeddedMessage } from "@/lib/embedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";
 import type { APIEmbed } from "discord-api-types/v10";
+
+export type AddCommandParams = {
+  scheduleData: {
+    title: string;
+    startAt: string;
+    endAt: string;
+    description?: string;
+    remindDays?: number;
+    options?: {
+      roleIds?: string[];
+      memberIds?: string[];
+    };
+  };
+};
 
 export interface ICommandService {
   addCommandImpl(params: AddCommandParams): Promise<{
