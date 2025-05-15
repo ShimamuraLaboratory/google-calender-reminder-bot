@@ -4,9 +4,12 @@ import type { AddCommandParams } from "./commandService.type";
 import { embeddedMessage } from "@/lib/embeddedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";
+import type { APIEmbed } from "discord-api-types/v10";
 
 export interface ICommandService {
-  addCommandImpl(params: AddCommandParams): Promise<string>;
+  addCommandImpl(params: AddCommandParams): Promise<{
+    embeds: APIEmbed[];
+  }>;
 }
 
 export class CommandService implements ICommandService {
@@ -20,7 +23,9 @@ export class CommandService implements ICommandService {
     this.calendarClient = calendarClient;
   }
 
-  async addCommandImpl(params: AddCommandParams): Promise<string> {
+  async addCommandImpl(params: AddCommandParams): Promise<{
+    embeds: APIEmbed[];
+  }> {
     const newEvent = await this.calendarClient
       .createEvent({
         summary: params.scheduleData.title,

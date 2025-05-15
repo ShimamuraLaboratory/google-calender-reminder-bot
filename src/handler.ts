@@ -2,6 +2,7 @@ import type { ICommandService } from "./services/commandService";
 import type { ISubscribeService } from "./services/subscribeService";
 import type {
   APIBaseInteraction,
+  APIEmbed,
   InteractionType,
 } from "discord-api-types/v10";
 import { SUB_COMMAND_ADD, SUB_COMMANDS } from "./constant";
@@ -37,7 +38,9 @@ export class Handlers {
     this.fetchServerInfoService = fetchServerInfoService;
   }
 
-  async handleCommand(body: SlashCommandObj): Promise<string> {
+  async handleCommand(body: SlashCommandObj): Promise<{
+    embeds: APIEmbed[];
+  }> {
     const subCommand = body.data?.options?.[0]?.name;
 
     if (!SUB_COMMANDS.has(subCommand || "")) {

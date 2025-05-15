@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import type { SubCommandType } from "@/constant";
+import type { APIEmbed } from "discord-api-types/v10";
 
 type MessageData = {
   id: string;
@@ -19,61 +20,64 @@ type Options = {
 export const embeddedMessage = (
   type: SubCommandType,
   data: MessageData | MessageData[],
-) => {
+): {
+  embeds: APIEmbed[];
+} => {
   const baseMessage = embeddedMessageImpls[type]();
 
   if (Array.isArray(data)) {
-    return baseMessage.replace("{events}", embeddedEvents(data));
+    baseMessage.description = embedEvents(data);
+  } else {
+    baseMessage.description = embedEvent(data);
   }
 
-  return baseMessage.replace("{event}", embeddEvent(data));
+  return {
+    embeds: [baseMessage],
+  };
 };
 
-const embeddedMessageImpls: Record<SubCommandType, () => string> = {
+const embeddedMessageImpls: Record<SubCommandType, () => APIEmbed> = {
   add: () => {
-    return "## カレンダーに予定が追加されました！\n \n {event}";
+    return {
+      title: "カレンダーの予定が追加されました！",
+      color: 0x00ff00,
+    };
   },
   list: () => {
-    return "## カレンダーの予定一覧です！\n {events}";
+    return {
+      title: "カレンダーの予定一覧です！",
+      color: 0x00ff00,
+    };
   },
   show: () => {
-    return "## カレンダーの予定詳細です！\n {event}";
+    return {
+      title: "予定の詳細です！",
+      color: 0x00ff00,
+    };
   },
   update: () => {
-    return "## カレンダーの予定が更新されました！\n {event}";
+    return {
+      title: "カレンダーの予定が更新されました！",
+      color: 0x00ff00,
+    };
   },
   delete: () => {
-    return "## カレンダーの予定が削除されました！\n {event}";
+    return {
+      title: "カレンダーの予定が削除されました！",
+      color: 0x00ff00,
+    };
   },
 };
 
-const embeddedOptions = (roleIds?: string[], memberIds?: string[]) => {
-  if (!roleIds && !memberIds) {
-    return "";
-  }
-
-  let options = "";
-  if (roleIds && roleIds.length > 0) {
-    options += `ロール : @${roleIds.join(", @")} \n`;
-  }
-
-  if (memberIds && memberIds.length > 0) {
-    options += `メンバー : @${memberIds.join(", @")} \n`;
-  }
-
-  return options;
-};
-
-const embeddEvent = (event: MessageData) => {
+const embedEvent = (event: MessageData) => {
   const msg = [] as string[];
-  msg.push(`### タイトル: ${event.title} \n`);
-  msg.push(`イベントID: ${event.id} \n`);
-
+  msg.push(`## イベント名: ${event.title} \n`);
   // NOTE: YYYY年MM月DD日 HH:mm形式に変換
   const startAt = dayjs(event.startAt).format("YYYY年MM月DD日 HH:mm");
   const endAt = dayjs(event.endAt).format("YYYY年MM月DD日 HH:mm");
 
-  msg.push(`期間: ${startAt} ~ ${endAt} \n`);
+  msg.push(`### 期間: ${startAt} ~ ${endAt} \n`);
+  msg.push(`イベントID: ${event.id} \n`);
   if (event.description) {
     msg.push(`詳細: ${event.description} \n`);
   }
@@ -85,10 +89,12 @@ const embeddEvent = (event: MessageData) => {
       msg.push(`メンバー : @${event.options.memberIds.join(", @")} \n`);
     }
   }
-  msg.push(`[リンク](${event.url})`);
+  if (event.url) {
+    msg.push(`[カレンダーで確認する](${event.url})`);
+  }
   return msg.join("");
 };
 
-const embeddedEvents = (events: MessageData[]) => {
-  return events.map((event) => embeddEvent(event)).join("\n");
+const embedEvents = (events: MessageData[]) => {
+  return events.map((event) => embedEvent(event)).join("\n");
 };
