@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./db/schema";
-import { DiscordClient } from "./repositories/discord/client";
-import { MemberRepository } from "./repositories/d1/membersRepository";
-import { RoleRepository } from "./repositories/d1/rolesRepository";
+import { DiscordClient } from "./infra/repositories/discord/client";
+import { MemberRepository } from "./infra/repositories/d1/membersRepository";
+import { RoleRepository } from "./infra/repositories/d1/rolesRepository";
 import { Handlers } from "./handler";
 import { FetchServerInfoService } from "./services/fetchServerInfoService";
 

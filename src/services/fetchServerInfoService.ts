@@ -1,6 +1,6 @@
-import type { IDiscordClient } from "@/repositories/discord/client";
-import type { IMemberRepository } from "@/repositories/d1/membersRepository";
-import type { IRoleRepository } from "@/repositories/d1/rolesRepository";
+import type { IDiscordClient } from "@/repositories/discord";
+import type { IMemberRepository } from "@/repositories/members";
+import type { IRoleRepository } from "@/repositories/roles";
 
 export interface IFetchServerInfoService {
   fetchMembers(guildId: string): Promise<void>;
