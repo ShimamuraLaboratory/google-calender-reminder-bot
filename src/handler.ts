@@ -6,7 +6,7 @@ import type {
   InteractionType,
 } from "discord-api-types/v10";
 import { SUB_COMMAND_ADD, SUB_COMMANDS } from "./constant";
-import type { AddCommandParams } from "./services/commandService.type";
+import type { AddCommandParams } from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 
 type SlashCommandObj = APIBaseInteraction<
