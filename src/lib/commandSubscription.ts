@@ -1,4 +1,8 @@
-import { COMMAND_DESCRIPTIONS, SUB_COMMAND_ADD, SUB_COMMAND_LIST } from "@/constant";
+import {
+  COMMAND_DESCRIPTIONS,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_LIST,
+} from "@/constant";
 
 export const COMMANDS = {
   name: "calendar",
