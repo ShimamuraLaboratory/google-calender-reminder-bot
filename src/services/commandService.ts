@@ -4,6 +4,7 @@ import { embeddedMessage } from "@/lib/embedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";
 import type { APIEmbed } from "discord-api-types/v10";
+import dayjs from "dayjs";
 
 export type AddCommandParams = {
   scheduleData: {
@@ -63,8 +64,8 @@ export class CommandService implements ICommandService {
         {
           id: scheduleId,
           title: params.scheduleData.title,
-          startAt: params.scheduleData.startAt,
-          endAt: params.scheduleData.endAt,
+          startAt: dayjs(params.scheduleData.startAt).unix(),
+          endAt: dayjs(params.scheduleData.endAt).unix(),
           description: params.scheduleData.description || null,
           remindDays: params.scheduleData.remindDays || null,
           eventId: newEvent.id || "",

@@ -5,8 +5,8 @@ import type { APIEmbed } from "discord-api-types/v10";
 type MessageData = {
   id: string;
   title: string;
-  startAt: string;
-  endAt: string;
+  startAt: string | number;
+  endAt: string | number;
   description?: string;
   url: string;
   options?: Options;
