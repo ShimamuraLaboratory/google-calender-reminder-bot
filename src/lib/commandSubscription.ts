@@ -1,4 +1,4 @@
-import { COMMAND_DESCRIPTIONS, SUB_COMMAND_ADD } from "@/constant";
+import { COMMAND_DESCRIPTIONS, SUB_COMMAND_ADD, SUB_COMMAND_LIST } from "@/constant";
 
 export const COMMANDS = {
   name: "calendar",
@@ -58,6 +58,25 @@ export const COMMANDS = {
               value: 5,
             },
           ],
+        },
+      ],
+    },
+    {
+      name: SUB_COMMAND_LIST,
+      description: COMMAND_DESCRIPTIONS[SUB_COMMAND_LIST],
+      type: 1,
+      options: [
+        {
+          name: "start_at",
+          description: "検索範囲の開始日時(YYYY-MM-DDTHH:mm)",
+          type: 3,
+          required: false,
+        },
+        {
+          name: "end_at",
+          description: "検索範囲の終了日時(YYYY-MM-DDTHH:mm)",
+          type: 3,
+          required: false,
         },
       ],
     },
