@@ -1,5 +1,10 @@
 import { relations } from "drizzle-orm";
-import { sqliteTable as table, text, integer } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable as table,
+  text,
+  integer,
+  int,
+} from "drizzle-orm/sqlite-core";
 
 export const roles = table("roles", {
   roleId: text("role_id").primaryKey(),
@@ -95,8 +100,8 @@ export const schedules = table("schedules", {
   eventId: text("event_id"),
   title: text("title").notNull(),
   description: text("description"),
-  startAt: text("start_at").notNull(),
-  endAt: text("end_at").notNull(),
+  startAt: int("start_at").notNull(),
+  endAt: int("end_at").notNull(),
   remindDays: integer("remind_days"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),

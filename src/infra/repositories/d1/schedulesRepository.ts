@@ -1,13 +1,59 @@
 import type { Schedule } from "../../../repositories/type";
 import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
 import BaseRepository from "./baseRepository";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, gte, lte } from "drizzle-orm";
 import type { IScheduleRepository } from "@/repositories/schedules";
 
 export class ScheduleRepository
   extends BaseRepository
   implements IScheduleRepository
 {
+  async findAll(params: {
+    startAt?: number;
+    endAt?: number;
+  }): Promise<Schedule[]> {
+    const { startAt, endAt } = params;
+
+    const res = await this.db.query.schedules.findMany({
+      where: (schedules, { and, isNull }) =>
+        and(
+          isNull(schedules.deletedAt),
+          // NOTE: startAt < schedules.startAt
+          startAt ? gte(schedules.startAt, startAt) : undefined,
+          // NOTE: endAt > schedules.endAt
+          endAt ? lte(schedules.endAt, endAt) : undefined,
+        ),
+      with: {
+        reminds: {
+          where: (reminds, { isNull }) => isNull(reminds.deletedAt),
+        },
+        scheduleMembers: {
+          with: {
+            member: {},
+          },
+        },
+        scheduleRoles: {
+          with: {
+            role: {},
+          },
+        },
+      },
+    });
+
+    const formattedRes: Schedule[] = res.map((schedule) => {
+      const { scheduleRoles, scheduleMembers, ...rest } = schedule;
+      return {
+        ...rest,
+        members: scheduleMembers.map((scheduleMember) => ({
+          ...scheduleMember.member,
+        })),
+        roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
+      };
+    });
+
+    return formattedRes;
+  }
+
   async findByEventId(id: string): Promise<Schedule | undefined> {
     const res = await this.db.query.schedules.findFirst({
       where: (schedules, { and, isNull, eq }) =>
