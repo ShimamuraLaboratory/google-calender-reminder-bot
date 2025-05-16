@@ -40,31 +40,36 @@ const embeddedMessageImpls: Record<SubCommandType, () => APIEmbed> = {
   add: () => {
     return {
       title: "カレンダーの予定が追加されました！",
+      // NOTE: 黄緑色
       color: 0x00ff00,
     };
   },
   list: () => {
     return {
       title: "カレンダーの予定一覧です！",
-      color: 0x00ff00,
+      // NOTE: 紫色
+      color: 0x800080,
     };
   },
   show: () => {
     return {
       title: "予定の詳細です！",
-      color: 0x00ff00,
+      // NOTE: 水色
+      color: 0x00ffff,
     };
   },
   update: () => {
     return {
       title: "カレンダーの予定が更新されました！",
-      color: 0x00ff00,
+      // NOTE: 青色
+      color: 0x0000ff,
     };
   },
   delete: () => {
     return {
       title: "カレンダーの予定が削除されました！",
-      color: 0x00ff00,
+      // NOTE: 赤色
+      color: 0xff0000,
     };
   },
 };
