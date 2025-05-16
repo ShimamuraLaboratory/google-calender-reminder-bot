@@ -20,6 +20,13 @@ export type AddCommandParams = {
   };
 };
 
+export type ListCommandParams = {
+  searchRange: {
+    startAt: string;
+    endAt: string;
+  };
+};
+
 export interface ICommandService {
   addCommandImpl(params: AddCommandParams): Promise<{
     embeds: APIEmbed[];
