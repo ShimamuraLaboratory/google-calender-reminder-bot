@@ -106,16 +106,6 @@ export class Handlers {
     const remindDays = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "remind_days",
     )?.value;
-    const memberIds = body.data?.options?.[0]?.options?.map((option) => {
-      if (option.name.includes("member_")) {
-        return option.value;
-      }
-    });
-    const roleIds = body.data?.options?.[0]?.options?.map((option) => {
-      if (option.name.includes("role_")) {
-        return option.value;
-      }
-    });
 
     const scheduleData: AddCommandParams = {
       scheduleData: {
@@ -124,10 +114,6 @@ export class Handlers {
         endAt,
         description,
         remindDays: Number(remindDays),
-        options: {
-          memberIds: memberIds?.filter((id) => id !== undefined) as string[],
-          roleIds: roleIds?.filter((id) => id !== undefined) as string[],
-        },
       },
     };
 
