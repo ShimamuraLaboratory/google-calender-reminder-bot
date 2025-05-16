@@ -11,8 +11,8 @@ export type Schedule = {
   eventId: string | null;
   title: string;
   description: string | null;
-  startAt: string;
-  endAt: string;
+  startAt: number;
+  endAt: number;
   remindDays: number | null;
   createdAt: string;
   updatedAt: string;
