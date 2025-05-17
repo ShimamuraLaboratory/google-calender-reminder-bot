@@ -1,4 +1,8 @@
-import { COMMAND_DESCRIPTIONS, SUB_COMMAND_ADD } from "@/constant";
+import {
+  COMMAND_DESCRIPTIONS,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_SHOW,
+} from "@/constant";
 
 export const COMMANDS = {
   name: "calendar",
@@ -60,6 +64,11 @@ export const COMMANDS = {
           ],
         },
       ],
+    },
+    {
+      name: SUB_COMMAND_SHOW,
+      description: COMMAND_DESCRIPTIONS[SUB_COMMAND_SHOW],
+      type: 1,
     },
   ],
 };
