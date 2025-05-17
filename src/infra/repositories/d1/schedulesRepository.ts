@@ -1,8 +1,8 @@
-import type { Schedule } from "../../../repositories/type";
+import type { Schedule } from "@/domain/entities/schedule";
 import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { and, eq, inArray, gte, lte } from "drizzle-orm";
-import type { IScheduleRepository } from "@/repositories/schedules";
+import type { IScheduleRepository } from "@/domain/repositories/schedules";
 
 export class ScheduleRepository
   extends BaseRepository

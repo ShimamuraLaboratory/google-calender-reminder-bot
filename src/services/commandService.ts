@@ -1,5 +1,5 @@
-import type { ICalendarClient } from "@/repositories/calendar";
-import type { IScheduleRepository } from "@/repositories/schedules";
+import type { ICalendarClient } from "@/domain/repositories/calendar";
+import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import { embeddedMessage } from "@/lib/embedMessage";
 import { SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";

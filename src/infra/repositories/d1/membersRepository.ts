@@ -1,8 +1,8 @@
 import BaseRepository from "./baseRepository";
-import type { Member } from "../../../repositories/type";
+import type { Member } from "@/domain/entities/member";
 import { members, roleMember, scheduleMember, remindMember } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
-import type { IMemberRepository } from "@/repositories/members";
+import type { IMemberRepository } from "@/domain/repositories/members";
 
 export class MemberRepository
   extends BaseRepository

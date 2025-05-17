@@ -1,8 +1,8 @@
-import type { Remind } from "../../../repositories/type";
+import type { Remind } from "@/domain/entities/remind";
 import { reminds, remindMember } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { and, eq, inArray } from "drizzle-orm";
-import type { IRemindRepository } from "@/repositories/reminds";
+import type { IRemindRepository } from "@/domain/repositories/reminds";
 
 export class RemindRepository
   extends BaseRepository
