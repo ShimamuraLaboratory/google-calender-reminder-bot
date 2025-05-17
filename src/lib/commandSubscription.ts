@@ -1,6 +1,7 @@
 import {
   COMMAND_DESCRIPTIONS,
   SUB_COMMAND_ADD,
+  SUB_COMMAND_DELETE,
   SUB_COMMAND_SHOW,
 } from "@/constant";
 
@@ -68,6 +69,11 @@ export const COMMANDS = {
     {
       name: SUB_COMMAND_SHOW,
       description: COMMAND_DESCRIPTIONS[SUB_COMMAND_SHOW],
+      type: 1,
+    },
+    {
+      name: SUB_COMMAND_DELETE,
+      description: COMMAND_DESCRIPTIONS[SUB_COMMAND_DELETE],
       type: 1,
     },
   ],

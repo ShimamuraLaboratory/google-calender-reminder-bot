@@ -27,6 +27,18 @@ export type SubCommandType =
   | typeof SUB_COMMAND_UPDATE
   | typeof SUB_COMMAND_DELETE;
 
+const CUSTOM_ID_ADD = "add";
+const CUSTOM_ID_SHOW = "show";
+const CUSTOM_ID_UPDATE = "update";
+const CUSTOM_ID_DELETE = "delete";
+
+const CUSTOM_IDS = new Set([
+  CUSTOM_ID_ADD,
+  CUSTOM_ID_SHOW,
+  CUSTOM_ID_UPDATE,
+  CUSTOM_ID_DELETE,
+]);
+
 export {
   COMMAND_DESCRIPTIONS,
   SUB_COMMAND_ADD,
@@ -35,4 +47,9 @@ export {
   SUB_COMMAND_UPDATE,
   SUB_COMMAND_DELETE,
   SUB_COMMANDS,
+  CUSTOM_ID_ADD,
+  CUSTOM_ID_SHOW,
+  CUSTOM_ID_UPDATE,
+  CUSTOM_ID_DELETE,
+  CUSTOM_IDS,
 };

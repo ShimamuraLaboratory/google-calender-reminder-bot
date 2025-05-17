@@ -2,7 +2,14 @@ import type { ICommandService } from "./services/commandService";
 import type { ISubscribeService } from "./services/subscribeService";
 import type { APIBaseInteraction, APIEmbed } from "discord-api-types/v10";
 import { InteractionType } from "discord-api-types/v10";
-import { SUB_COMMAND_ADD, SUB_COMMAND_SHOW, SUB_COMMANDS } from "./constant";
+import {
+  CUSTOM_ID_DELETE,
+  CUSTOM_ID_SHOW,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_DELETE,
+  SUB_COMMAND_SHOW,
+  SUB_COMMANDS,
+} from "./constant";
 import type { AddCommandParams } from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
@@ -110,15 +117,39 @@ export class Handlers {
         throw new Error("不正なイベントIDです");
       }
 
-      const eventId = values?.[0];
+      switch (customId) {
+        case CUSTOM_ID_SHOW: {
+          const eventId = values?.[0];
+          if (!eventId) {
+            throw new Error("不正なイベントIDです");
+          }
 
-      const message = await this.interactionService
-        .showInteractionImpl(eventId)
-        .catch((e) => {
-          throw new Error(e);
-        });
+          const message = await this.interactionService
+            .showInteractionImpl(eventId)
+            .catch((e) => {
+              throw new Error(e);
+            });
 
-      return message;
+          return message;
+        }
+        case CUSTOM_ID_DELETE: {
+          const eventId = values?.[0];
+          if (!eventId) {
+            throw new Error("不正なイベントIDです");
+          }
+
+          const message = await this.interactionService
+            .deleteInteractionImpl(eventId)
+            .catch((e) => {
+              throw new Error(e);
+            });
+
+          return message;
+        }
+        default: {
+          throw new Error("不正なリクエストです");
+        }
+      }
     }
 
     const subCommand = body.data?.options?.[0]?.name;
@@ -144,6 +175,14 @@ export class Handlers {
       case SUB_COMMAND_SHOW: {
         const message = await this.commandService
           .showCommandImpl()
+          .catch((e) => {
+            throw new Error(e);
+          });
+        return message;
+      }
+      case SUB_COMMAND_DELETE: {
+        const message = await this.commandService
+          .deleteCommandImpl()
           .catch((e) => {
             throw new Error(e);
           });
