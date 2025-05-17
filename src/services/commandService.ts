@@ -1,7 +1,7 @@
 import type { ICalendarClient } from "@/repositories/calendar";
 import type { IScheduleRepository } from "@/repositories/schedules";
 import { embeddedMessage } from "@/lib/embedMessage";
-import { SUB_COMMAND_ADD } from "@/constant";
+import { SUB_COMMAND_ADD, SUB_COMMAND_LIST } from "@/constant";
 import { v4 as uuid } from "uuid";
 import type { APIEmbed } from "discord-api-types/v10";
 import dayjs from "dayjs";
@@ -100,6 +100,40 @@ export class CommandService implements ICommandService {
       },
     });
 
+    return message;
+  }
+
+  async listCommandImpl(params: ListCommandParams): Promise<{
+    embeds: APIEmbed[];
+  }> {
+    const startTimestamp = dayjs(params.searchRange.startAt).unix();
+    const endTimestamp = dayjs(params.searchRange.endAt).unix();
+
+    const schedules = await this.scheduleRepository
+      .findAll({
+        startAt: startTimestamp,
+        endAt: endTimestamp,
+      })
+      .catch((e) => {
+        throw new Error(`イベントの取得に失敗しました: ${e}`);
+      });
+    
+    
+    const eventsData = schedules.map((schedule) => ({
+      id: schedule.eventId || schedule.id,
+      title: schedule.title,
+      startAt: schedule.startAt,
+      endAt: schedule.endAt,
+      description: schedule.description || undefined,
+      url: "",
+      options: {
+        roleIds: schedule.roles ? schedule.roles.map((role) => role.roleId) : [],
+        memberIds: schedule.members ? schedule.members.map((member) => member.memberId) : [],
+      },
+    }));
+
+    const message = embeddedMessage(SUB_COMMAND_LIST, eventsData);
+    
     return message;
   }
 }
