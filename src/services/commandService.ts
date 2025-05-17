@@ -82,6 +82,9 @@ export interface ICommandService {
       }[];
     }[];
   }>;
+  listCommandImpl(params: ListCommandParams): Promise<{
+    embeds: APIEmbed[];
+  }>;
 }
 
 export class CommandService implements ICommandService {
