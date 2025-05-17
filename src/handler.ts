@@ -11,7 +11,10 @@ import {
   SUB_COMMANDS,
   SUB_COMMAND_LIST,
 } from "./constant";
-import type { AddCommandParams, ListCommandParams } from "./services/commandService";
+import type {
+  AddCommandParams,
+  ListCommandParams,
+} from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
 
@@ -195,7 +198,7 @@ export class Handlers {
           .listCommandImpl(searchRange)
           .catch((e) => {
             throw new Error(e);
-          })
+          });
         return message;
       }
     }
@@ -259,10 +262,10 @@ export class Handlers {
 
   handleListCommandImpl(body: SlashCommandObj): ListCommandParams {
     const startAt = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "start_at"
+      (option) => option.name === "start_at",
     )?.value as string | undefined;
     const endAt = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "end_at"
+      (option) => option.name === "end_at",
     )?.value as string | undefined;
 
     return {
