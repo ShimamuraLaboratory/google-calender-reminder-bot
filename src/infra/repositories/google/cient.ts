@@ -1,4 +1,4 @@
-import type { ICalendarClient } from "@/repositories/calendar";
+import type { ICalendarClient } from "@/domain/repositories/calendar";
 import type google from "googleapis";
 
 // TODO: google APIの設定が終わったら実装に着手 (2025/05/10)

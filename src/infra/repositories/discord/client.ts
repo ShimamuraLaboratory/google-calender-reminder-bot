@@ -1,4 +1,4 @@
-import type { IDiscordClient } from "@/repositories/discord";
+import type { IDiscordClient } from "@/domain/repositories/discord";
 import { COMMANDS } from "@/lib/commandSubscription";
 import type {
   RESTGetAPIGuildMembersResult,
