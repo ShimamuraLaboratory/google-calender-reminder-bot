@@ -1,4 +1,4 @@
-import type { Member } from "./type";
+import type { Member } from "@/domain/entities/member";
 
 export interface IMemberRepository {
   findAll(): Promise<Member[]>;

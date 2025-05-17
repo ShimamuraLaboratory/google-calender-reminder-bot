@@ -1,4 +1,4 @@
-import type { Remind } from "./type";
+import type { Remind } from "@/domain/entities/remind";
 
 export interface IRemindRepository {
   findById(id: string): Promise<Remind | undefined>;

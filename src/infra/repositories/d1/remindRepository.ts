@@ -1,8 +1,9 @@
-import type { Remind } from "../../../repositories/type";
+import type { Remind } from "@/domain/entities/remind";
 import { reminds, remindMember } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { and, eq, inArray } from "drizzle-orm";
-import type { IRemindRepository } from "@/repositories/reminds";
+import type { IRemindRepository } from "@/domain/repositories/reminds";
+import { newSchedule } from "@/domain/entities/schedule";
 
 export class RemindRepository
   extends BaseRepository
@@ -34,7 +35,9 @@ export class RemindRepository
       createdAt: res.createdAt,
       updatedAt: res.updatedAt,
       deletedAt: res.deletedAt,
-      schedule: res.schedule,
+      schedule: newSchedule({
+        ...res.schedule,
+      }),
       members: res.remindMembers?.map((remindMember) => {
         return {
           ...remindMember.member,
@@ -62,6 +65,9 @@ export class RemindRepository
     const formattedRes: Remind[] = res.map((remind) => {
       return {
         ...remind,
+        schedule: newSchedule({
+          ...remind.schedule,
+        }),
         members: remind.remindMembers?.map((remindMember) => {
           return {
             ...remindMember.member,
