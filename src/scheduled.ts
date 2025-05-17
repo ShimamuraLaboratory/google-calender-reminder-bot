@@ -30,7 +30,12 @@ const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
     roleRepository,
   );
 
-  const handler = new Handlers(undefined, undefined, fetchServerInfoService);
+  const handler = new Handlers(
+    undefined,
+    undefined,
+    undefined,
+    fetchServerInfoService,
+  );
 
   switch (event.cron) {
     case "0 * * * *": {

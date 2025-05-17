@@ -1,8 +1,8 @@
-import type { Role } from "../../../repositories/type";
+import type { Role } from "@/domain/entities/role";
 import { roleMember, roles, scheduleRole } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { eq, inArray } from "drizzle-orm";
-import type { IRoleRepository } from "@/repositories/roles";
+import type { IRoleRepository } from "@/domain/repositories/roles";
 
 export class RoleRepository extends BaseRepository implements IRoleRepository {
   async findAll(): Promise<Role[]> {

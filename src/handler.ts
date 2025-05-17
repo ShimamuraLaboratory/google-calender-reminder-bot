@@ -1,13 +1,18 @@
 import type { ICommandService } from "./services/commandService";
 import type { ISubscribeService } from "./services/subscribeService";
-import type {
-  APIBaseInteraction,
-  APIEmbed,
-  InteractionType,
-} from "discord-api-types/v10";
-import { SUB_COMMAND_ADD, SUB_COMMANDS } from "./constant";
-import type { AddCommandParams } from "./services/commandService.type";
+import type { APIBaseInteraction, APIEmbed } from "discord-api-types/v10";
+import { InteractionType } from "discord-api-types/v10";
+import {
+  CUSTOM_ID_DELETE,
+  CUSTOM_ID_SHOW,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_DELETE,
+  SUB_COMMAND_SHOW,
+  SUB_COMMANDS,
+} from "./constant";
+import type { AddCommandParams } from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
+import type { IInteractionService } from "./services/interactionService";
 
 type SlashCommandObj = APIBaseInteraction<
   InteractionType.ApplicationCommand,
@@ -23,24 +28,130 @@ type SlashCommandObj = APIBaseInteraction<
   }
 >;
 
+type MessageComponentObj = APIBaseInteraction<
+  InteractionType.MessageComponent,
+  {
+    custom_id: string;
+    component_type: number;
+    values?: string[];
+  }
+>;
+
+type InteractionObj = SlashCommandObj | MessageComponentObj;
+
+type EmbedResponseObj = {
+  embeds: APIEmbed[];
+};
+
+// NOTE: show等セレクトメニューを伴うメッセージのレスポンス
+type MessageResponseObj = {
+  content: string;
+  components?: {
+    type: number;
+    components: {
+      type: number;
+      custom_id: string;
+      minValues?: number;
+      maxValues?: number;
+      placeholder?: string;
+      options: {
+        value: string;
+        label: string;
+        emoji?: {
+          id?: string;
+          name?: string;
+        };
+      }[];
+    }[];
+  }[];
+};
+
+type InteractionResponseObj = EmbedResponseObj | MessageResponseObj;
+
+export const isMessageComponentObj = (
+  obj: InteractionObj,
+): obj is MessageComponentObj => {
+  return obj.type === InteractionType.MessageComponent;
+};
+
+export const isMessageResponseObj = (
+  obj: InteractionResponseObj,
+): obj is MessageResponseObj => {
+  return !!(obj as MessageResponseObj).components;
+};
+
 export class Handlers {
   private commandService: ICommandService | undefined;
   private subscribeService: ISubscribeService | undefined;
+  private interactionService: IInteractionService | undefined;
   private fetchServerInfoService: IFetchServerInfoService | undefined;
 
   constructor(
     commandService?: ICommandService,
     subscribeService?: ISubscribeService,
+    interactionService?: IInteractionService,
     fetchServerInfoService?: IFetchServerInfoService,
   ) {
     this.commandService = commandService;
     this.subscribeService = subscribeService;
+    this.interactionService = interactionService;
     this.fetchServerInfoService = fetchServerInfoService;
   }
 
-  async handleCommand(body: SlashCommandObj): Promise<{
-    embeds: APIEmbed[];
-  }> {
+  async handleCommand(body: InteractionObj): Promise<InteractionResponseObj> {
+    if (isMessageComponentObj(body)) {
+      if (!this.interactionService) {
+        throw new Error("interactionService is not initialized");
+      }
+
+      if (!body.data) {
+        throw new Error("不正なリクエストです");
+      }
+
+      const { custom_id: customId, values } = body.data;
+      if (!customId) {
+        throw new Error("不正なリクエストです");
+      }
+
+      if (!values || values.length === 0) {
+        throw new Error("不正なイベントIDです");
+      }
+
+      switch (customId) {
+        case CUSTOM_ID_SHOW: {
+          const eventId = values?.[0];
+          if (!eventId) {
+            throw new Error("不正なイベントIDです");
+          }
+
+          const message = await this.interactionService
+            .showInteractionImpl(eventId)
+            .catch((e) => {
+              throw new Error(e);
+            });
+
+          return message;
+        }
+        case CUSTOM_ID_DELETE: {
+          const eventId = values?.[0];
+          if (!eventId) {
+            throw new Error("不正なイベントIDです");
+          }
+
+          const message = await this.interactionService
+            .deleteInteractionImpl(eventId)
+            .catch((e) => {
+              throw new Error(e);
+            });
+
+          return message;
+        }
+        default: {
+          throw new Error("不正なリクエストです");
+        }
+      }
+    }
+
     const subCommand = body.data?.options?.[0]?.name;
 
     if (!SUB_COMMANDS.has(subCommand || "")) {
@@ -59,6 +170,22 @@ export class Handlers {
             throw new Error(e);
           });
 
+        return message;
+      }
+      case SUB_COMMAND_SHOW: {
+        const message = await this.commandService
+          .showCommandImpl()
+          .catch((e) => {
+            throw new Error(e);
+          });
+        return message;
+      }
+      case SUB_COMMAND_DELETE: {
+        const message = await this.commandService
+          .deleteCommandImpl()
+          .catch((e) => {
+            throw new Error(e);
+          });
         return message;
       }
     }
@@ -106,16 +233,6 @@ export class Handlers {
     const remindDays = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "remind_days",
     )?.value;
-    const memberIds = body.data?.options?.[0]?.options?.map((option) => {
-      if (option.name.includes("member_")) {
-        return option.value;
-      }
-    });
-    const roleIds = body.data?.options?.[0]?.options?.map((option) => {
-      if (option.name.includes("role_")) {
-        return option.value;
-      }
-    });
 
     const scheduleData: AddCommandParams = {
       scheduleData: {
@@ -124,10 +241,6 @@ export class Handlers {
         endAt,
         description,
         remindDays: Number(remindDays),
-        options: {
-          memberIds: memberIds?.filter((id) => id !== undefined) as string[],
-          roleIds: roleIds?.filter((id) => id !== undefined) as string[],
-        },
       },
     };
 

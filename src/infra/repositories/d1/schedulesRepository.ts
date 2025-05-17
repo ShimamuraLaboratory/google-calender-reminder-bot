@@ -1,8 +1,9 @@
-import type { Schedule } from "../../../repositories/type";
+import type { Schedule } from "@/domain/entities/schedule";
+import { newSchedule } from "@/domain/entities/schedule";
 import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
 import BaseRepository from "./baseRepository";
 import { and, eq, inArray, gte, lte } from "drizzle-orm";
-import type { IScheduleRepository } from "@/repositories/schedules";
+import type { IScheduleRepository } from "@/domain/repositories/schedules";
 
 export class ScheduleRepository
   extends BaseRepository
@@ -42,13 +43,49 @@ export class ScheduleRepository
 
     const formattedRes: Schedule[] = res.map((schedule) => {
       const { scheduleRoles, scheduleMembers, ...rest } = schedule;
-      return {
+      return newSchedule({
         ...rest,
         members: scheduleMembers.map((scheduleMember) => ({
           ...scheduleMember.member,
         })),
         roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
-      };
+      });
+    });
+
+    return formattedRes;
+  }
+
+  async findById(id: string): Promise<Schedule | undefined> {
+    const res = await this.db.query.schedules.findFirst({
+      where: (schedules, { and, eq, isNull }) =>
+        and(eq(schedules.id, id), isNull(schedules.deletedAt)),
+      with: {
+        reminds: {
+          where: (reminds, { isNull }) => isNull(reminds.deletedAt),
+        },
+        scheduleMembers: {
+          with: {
+            member: {},
+          },
+        },
+        scheduleRoles: {
+          with: {
+            role: {},
+          },
+        },
+      },
+    });
+
+    if (!res) {
+      return undefined;
+    }
+
+    const formattedRes: Schedule = newSchedule({
+      ...res,
+      members: res.scheduleMembers.map((scheduleMember) => ({
+        ...scheduleMember.member,
+      })),
+      roles: res.scheduleRoles.map((scheduleRole) => scheduleRole.role),
     });
 
     return formattedRes;
@@ -79,23 +116,13 @@ export class ScheduleRepository
       return undefined;
     }
 
-    const formattedRes: Schedule = {
-      id: res.id,
-      eventId: res.eventId,
-      title: res.title,
-      description: res.description,
-      startAt: res.startAt,
-      endAt: res.endAt,
-      remindDays: res.remindDays,
-      createdAt: res.createdAt,
-      updatedAt: res.updatedAt,
-      deletedAt: res.deletedAt,
-      reminds: res.reminds,
+    const formattedRes: Schedule = newSchedule({
+      ...res,
       members: res.scheduleMembers.map((scheduleMember) => ({
         ...scheduleMember.member,
       })),
       roles: res.scheduleRoles.map((scheduleRole) => scheduleRole.role),
-    };
+    });
 
     return formattedRes;
   }
@@ -123,13 +150,13 @@ export class ScheduleRepository
 
     const formattedRes: Schedule[] = res.map((schedule) => {
       const { scheduleRoles, scheduleMembers, ...rest } = schedule;
-      return {
+      return newSchedule({
         ...rest,
         members: scheduleMembers.map((scheduleMember) => ({
           ...scheduleMember.member,
         })),
         roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
-      };
+      });
     });
 
     return formattedRes;

@@ -1,4 +1,4 @@
-import type { Role } from "./type";
+import type { Role } from "@/domain/entities/role";
 
 export interface IRoleRepository {
   findAll(): Promise<Role[]>;

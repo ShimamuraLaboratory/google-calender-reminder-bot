@@ -8,7 +8,7 @@ type MessageData = {
   startAt: string | number;
   endAt: string | number;
   description?: string;
-  url: string;
+  url?: string;
   options?: Options;
 };
 
@@ -40,31 +40,36 @@ const embeddedMessageImpls: Record<SubCommandType, () => APIEmbed> = {
   add: () => {
     return {
       title: "カレンダーの予定が追加されました！",
+      // NOTE: 黄緑色
       color: 0x00ff00,
     };
   },
   list: () => {
     return {
       title: "カレンダーの予定一覧です！",
-      color: 0x00ff00,
+      // NOTE: 紫色
+      color: 0x800080,
     };
   },
   show: () => {
     return {
       title: "予定の詳細です！",
-      color: 0x00ff00,
+      // NOTE: 水色
+      color: 0x00ffff,
     };
   },
   update: () => {
     return {
       title: "カレンダーの予定が更新されました！",
-      color: 0x00ff00,
+      // NOTE: 青色
+      color: 0x0000ff,
     };
   },
   delete: () => {
     return {
       title: "カレンダーの予定が削除されました！",
-      color: 0x00ff00,
+      // NOTE: 赤色
+      color: 0xff0000,
     };
   },
 };
@@ -72,7 +77,13 @@ const embeddedMessageImpls: Record<SubCommandType, () => APIEmbed> = {
 const embedEvent = (event: MessageData) => {
   const msg = [] as string[];
   msg.push(`## イベント名: ${event.title} \n`);
+
   // NOTE: YYYY年MM月DD日 HH:mm形式に変換
+  if (typeof event.startAt === "number" && typeof event.endAt === "number") {
+    // NOTE: dayjsはミリ単位の為, 秒単位に変換
+    event.startAt = event.startAt * 1000;
+    event.endAt = event.endAt * 1000;
+  }
   const startAt = dayjs(event.startAt).format("YYYY年MM月DD日 HH:mm");
   const endAt = dayjs(event.endAt).format("YYYY年MM月DD日 HH:mm");
 
