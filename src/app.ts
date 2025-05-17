@@ -12,8 +12,9 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./db/schema";
 import { CommandService } from "./services/commandService";
 import { GoogleCalendarClient } from "./infra/repositories/google/cient";
-import { Handlers } from "./handler";
+import { Handlers, isMessageResponseObj } from "./handler";
 import { SubscribeService } from "./services/subscribeService";
+import { InteractionService } from "./services/interactionService";
 
 type Bindings = {
   DISCORD_PUBLIC_KEY: string;
@@ -63,15 +64,27 @@ app.post("/", verifyMiddleware, async (c) => {
 
   const googleCalendarClient = new GoogleCalendarClient();
   const scheduleRepository = new ScheduleRepository(db);
+  const interactionService = new InteractionService(scheduleRepository);
   const commandService = new CommandService(
     scheduleRepository,
     googleCalendarClient,
   );
-  const handler = new Handlers(commandService);
+  const handler = new Handlers(commandService, undefined, interactionService);
 
   return await handler
     .handleCommand(body)
-    .then((response) => {
+    .then(async (response) => {
+      if (isMessageResponseObj(response)) {
+        return c.json({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: response.content,
+            components: response.components,
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
