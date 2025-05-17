@@ -1,7 +1,7 @@
 import type { ICalendarClient } from "@/domain/repositories/calendar";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import { embeddedMessage } from "@/lib/embedMessage";
-import { SUB_COMMAND_ADD } from "@/constant";
+import { CUSTOM_ID_DELETE, CUSTOM_ID_SHOW, SUB_COMMAND_ADD } from "@/constant";
 import { v4 as uuid } from "uuid";
 import { ComponentType, type APIEmbed } from "discord-api-types/v10";
 import dayjs from "dayjs";
@@ -38,6 +38,27 @@ export interface ICommandService {
         custom_id: string;
         minValues?: number;
         maxValues?: number;
+        options: {
+          value: string;
+          label: string;
+          emoji?: {
+            id?: string;
+            name?: string;
+          };
+        }[];
+      }[];
+    }[];
+  }>;
+  deleteCommandImpl(): Promise<{
+    content: string;
+    components: {
+      type: number;
+      components: {
+        type: number;
+        custom_id: string;
+        minValues?: number;
+        maxValues?: number;
+        placeholder?: string;
         options: {
           value: string;
           label: string;
@@ -162,8 +183,67 @@ export class CommandService implements ICommandService {
           components: [
             {
               type: ComponentType.StringSelect,
-              custom_id: "select_event",
+              custom_id: CUSTOM_ID_SHOW,
               placeholder: "イベントを選択してください",
+              minValues: 1,
+              maxValues: Math.max(25, schedules.length),
+              options: schedules.map((schedule) => ({
+                value: schedule.id,
+                label: schedule.title,
+                emoji: {
+                  name: "🗓️",
+                },
+              })),
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  async deleteCommandImpl(): Promise<{
+    content: string;
+    components: {
+      type: number;
+      components: {
+        type: number;
+        custom_id: string;
+        minValues?: number;
+        maxValues?: number;
+        placeholder?: string;
+        options: {
+          value: string;
+          label: string;
+          emoji?: {
+            id?: string;
+            name?: string;
+          };
+        }[];
+      }[];
+    }[];
+  }> {
+    const message = "### 削除するイベントを選択してください \n \n";
+
+    const currentDate = dayjs().unix();
+
+    const schedules = await this.scheduleRepository
+      .findAll({
+        startAt: currentDate,
+      })
+      .catch((e) => {
+        throw new Error(`イベントの取得に失敗しました: ${e}`);
+      });
+
+    return {
+      content: message,
+      components: [
+        {
+          type: ComponentType.ActionRow,
+          components: [
+            {
+              type: ComponentType.StringSelect,
+              custom_id: CUSTOM_ID_DELETE,
+              placeholder: "削除するイベントを選択してください",
               minValues: 1,
               maxValues: Math.max(25, schedules.length),
               options: schedules.map((schedule) => ({
