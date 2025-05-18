@@ -40,7 +40,7 @@ export interface ICommandService {
   }>;
   showCommandImpl(): Promise<{
     content: string;
-    components: {
+    components?: {
       type: number;
       components: {
         type: number;
@@ -61,7 +61,7 @@ export interface ICommandService {
   }>;
   deleteCommandImpl(): Promise<{
     content: string;
-    components: {
+    components?: {
       type: number;
       components: {
         type: number;
@@ -225,6 +225,13 @@ export class CommandService implements ICommandService {
         throw new Error(`イベントの取得に失敗しました: ${e}`);
       });
 
+    if (schedules.length === 0) {
+      return {
+        content: "現在、登録されているイベントはありません。",
+        components: [],
+      };
+    }
+
     return {
       content: message,
       components: [
@@ -283,6 +290,13 @@ export class CommandService implements ICommandService {
       .catch((e) => {
         throw new Error(`イベントの取得に失敗しました: ${e}`);
       });
+
+    if (schedules.length === 0) {
+      return {
+        content: "現在、登録されているイベントはありません。",
+        components: [],
+      };
+    }
 
     return {
       content: message,
