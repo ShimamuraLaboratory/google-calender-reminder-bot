@@ -17,6 +17,7 @@ import type {
 } from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
+import dayjs from "dayjs";
 
 type SlashCommandObj = APIBaseInteraction<
   InteractionType.ApplicationCommand,
@@ -261,15 +262,23 @@ export class Handlers {
   }
 
   handleListCommandImpl(body: SlashCommandObj): ListCommandParams {
-    const startAt = body.data?.options?.[0]?.options?.find(
+    let startAt = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "start_at",
     )?.value as string | undefined;
     const endAt = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "end_at",
     )?.value as string | undefined;
 
+    if (!startAt) {
+      startAt = dayjs().format("YYYY-MM-DDTHH:mm");
+    }
+
+    if (endAt) {
+      this.validateDate(startAt as string, endAt as string);
+    }
+
     return {
-      startAt: startAt ?? "",
+      startAt: startAt,
       endAt: endAt ?? "",
     };
   }
