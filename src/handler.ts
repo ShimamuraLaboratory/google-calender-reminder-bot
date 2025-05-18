@@ -262,24 +262,16 @@ export class Handlers {
   }
 
   handleListCommandImpl(body: SlashCommandObj): ListCommandParams {
-    let startAt = body.data?.options?.[0]?.options?.find(
+    const startAt = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "start_at",
-    )?.value as string | undefined;
+    )?.value;
     const endAt = body.data?.options?.[0]?.options?.find(
       (option) => option.name === "end_at",
-    )?.value as string | undefined;
-
-    if (!startAt) {
-      startAt = dayjs().format("YYYY-MM-DDTHH:mm");
-    }
-
-    if (endAt) {
-      this.validateDate(startAt as string, endAt as string);
-    }
+    )?.value;
 
     return {
-      startAt: startAt,
-      endAt: endAt ?? "",
+      startAt,
+      endAt,
     };
   }
 
