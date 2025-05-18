@@ -170,24 +170,7 @@ export class CommandService implements ICommandService {
         throw new Error(`イベントの取得に失敗しました: ${e}`);
       });
 
-    const eventsData = schedules.map((schedule) => ({
-      id: schedule.eventId || schedule.id,
-      title: schedule.title,
-      startAt: schedule.startAt,
-      endAt: schedule.endAt,
-      description: schedule.description || undefined,
-      url: "",
-      options: {
-        roleIds: schedule.roles
-          ? schedule.roles.map((role) => role.roleId)
-          : [],
-        memberIds: schedule.members
-          ? schedule.members.map((member) => member.memberId)
-          : [],
-      },
-    }));
-
-    const message = embeddedMessage(SUB_COMMAND_LIST, eventsData);
+    const message = embeddedMessage(SUB_COMMAND_LIST, schedules);
 
     return message;
   }
