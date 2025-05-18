@@ -12,9 +12,10 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./db/schema";
 import { CommandService } from "./services/commandService";
 import { GoogleCalendarClient } from "./infra/repositories/google/cient";
-import { Handlers, isMessageResponseObj } from "./handler";
+import { Handlers, isMessageResponseObj, isModalResponseObj } from "./handler";
 import { SubscribeService } from "./services/subscribeService";
 import { InteractionService } from "./services/interactionService";
+import { ModalService } from "./services/modalService";
 
 type Bindings = {
   DISCORD_PUBLIC_KEY: string;
@@ -62,14 +63,16 @@ app.post("/", verifyMiddleware, async (c) => {
 
   const db = drizzle(c.env.D1_DATABASE, { schema: schema });
 
-  const googleCalendarClient = new GoogleCalendarClient();
   const scheduleRepository = new ScheduleRepository(db);
   const interactionService = new InteractionService(scheduleRepository);
-  const commandService = new CommandService(
-    scheduleRepository,
-    googleCalendarClient,
+  const modalService = new ModalService(scheduleRepository);
+  const commandService = new CommandService(scheduleRepository);
+  const handler = new Handlers(
+    commandService,
+    undefined,
+    interactionService,
+    modalService,
   );
-  const handler = new Handlers(commandService, undefined, interactionService);
 
   return await handler
     .handleCommand(body)
@@ -81,6 +84,17 @@ app.post("/", verifyMiddleware, async (c) => {
             content: response.content,
             components: response.components,
             flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+
+      if (isModalResponseObj(response)) {
+        return c.json({
+          type: InteractionResponseType.MODAL,
+          data: {
+            custom_id: response.modal.custom_id,
+            title: response.modal.title,
+            components: response.modal.components,
           },
         });
       }
