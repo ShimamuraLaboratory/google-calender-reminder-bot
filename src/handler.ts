@@ -9,8 +9,12 @@ import {
   SUB_COMMAND_DELETE,
   SUB_COMMAND_SHOW,
   SUB_COMMANDS,
+  SUB_COMMAND_LIST,
 } from "./constant";
-import type { AddCommandParams } from "./services/commandService";
+import type {
+  AddCommandParams,
+  ListCommandParams,
+} from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
 import dayjs from "dayjs";
@@ -189,6 +193,15 @@ export class Handlers {
           });
         return message;
       }
+      case SUB_COMMAND_LIST: {
+        const { startAt, endAt } = this.handleListCommandImpl(body);
+        const message = await this.commandService
+          .listCommandImpl({ startAt, endAt })
+          .catch((e) => {
+            throw new Error(e);
+          });
+        return message;
+      }
     }
 
     throw new Error("Invalid subcommand");
@@ -246,6 +259,20 @@ export class Handlers {
     };
 
     return scheduleData;
+  }
+
+  handleListCommandImpl(body: SlashCommandObj): ListCommandParams {
+    const startAt = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "start_at",
+    )?.value;
+    const endAt = body.data?.options?.[0]?.options?.find(
+      (option) => option.name === "end_at",
+    )?.value;
+
+    return {
+      startAt,
+      endAt,
+    };
   }
 
   async handleFetchMemberInfo(guildId: string): Promise<void> {

@@ -1,7 +1,12 @@
 import type { ICalendarClient } from "@/domain/repositories/calendar";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import { embeddedMessage } from "@/lib/embedMessage";
-import { CUSTOM_ID_DELETE, CUSTOM_ID_SHOW, SUB_COMMAND_ADD } from "@/constant";
+import {
+  CUSTOM_ID_DELETE,
+  CUSTOM_ID_SHOW,
+  SUB_COMMAND_ADD,
+  SUB_COMMAND_LIST,
+} from "@/constant";
 import { v4 as uuid } from "uuid";
 import { ComponentType, type APIEmbed } from "discord-api-types/v10";
 import dayjs from "dayjs";
@@ -22,6 +27,11 @@ export type AddCommandParams = {
 
 export type ShowCommandParams = {
   eventId: string;
+};
+
+export type ListCommandParams = {
+  startAt?: string;
+  endAt?: string;
 };
 
 export type ComponentObj = {
@@ -54,6 +64,9 @@ export interface ICommandService {
   deleteCommandImpl(): Promise<{
     content: string;
     components?: ComponentObj[];
+  }>;
+  listCommandImpl(params: ListCommandParams): Promise<{
+    embeds: APIEmbed[];
   }>;
 }
 
@@ -123,6 +136,26 @@ export class CommandService implements ICommandService {
         memberIds: params.scheduleData.options?.memberIds,
       },
     });
+
+    return message;
+  }
+
+  async listCommandImpl(params: ListCommandParams): Promise<{
+    embeds: APIEmbed[];
+  }> {
+    const startTimestamp = dayjs(params.startAt).unix();
+    const endTimestamp = params.endAt ? dayjs(params.endAt).unix() : undefined;
+
+    const schedules = await this.scheduleRepository
+      .findAll({
+        startAt: startTimestamp,
+        endAt: endTimestamp,
+      })
+      .catch((e) => {
+        throw new Error(`イベントの取得に失敗しました: ${e}`);
+      });
+
+    const message = embeddedMessage(SUB_COMMAND_LIST, schedules);
 
     return message;
   }
