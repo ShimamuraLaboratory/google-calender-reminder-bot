@@ -39,6 +39,7 @@ export class ScheduleRepository
           },
         },
       },
+      orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
     });
 
     const formattedRes: Schedule[] = res.map((schedule) => {
@@ -146,6 +147,7 @@ export class ScheduleRepository
           },
         },
       },
+      orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
     });
 
     const formattedRes: Schedule[] = res.map((schedule) => {
