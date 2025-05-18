@@ -112,7 +112,6 @@ export class MemberRepository
       const roleMemberData = data.roles.map((roleId) => ({
         roleId,
         memberId: data.memberId,
-        nickName: data.nickName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));

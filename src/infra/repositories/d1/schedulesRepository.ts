@@ -252,13 +252,6 @@ export class ScheduleRepository
         updatedAt: new Date().toISOString(),
       }));
 
-      if (formattedScheduleRole.length > 0) {
-        await this.db
-          .insert(scheduleRole)
-          .values(formattedScheduleRole)
-          .execute();
-      }
-
       if (toDelete.length > 0) {
         await this.db
           .delete(scheduleRole)
@@ -268,6 +261,13 @@ export class ScheduleRepository
               inArray(scheduleRole.roleId, toDelete),
             ),
           )
+          .execute();
+      }
+
+      if (formattedScheduleRole.length > 0) {
+        await this.db
+          .insert(scheduleRole)
+          .values(formattedScheduleRole)
           .execute();
       }
     }
