@@ -30,10 +30,8 @@ export type ShowCommandParams = {
 };
 
 export type ListCommandParams = {
-  searchRange: {
-    startAt: string;
-    endAt: string;
-  };
+  startAt: string;
+  endAt: string;
 };
 
 export interface ICommandService {
@@ -160,8 +158,8 @@ export class CommandService implements ICommandService {
   async listCommandImpl(params: ListCommandParams): Promise<{
     embeds: APIEmbed[];
   }> {
-    const startTimestamp = dayjs(params.searchRange.startAt).unix();
-    const endTimestamp = dayjs(params.searchRange.endAt).unix();
+    const startTimestamp = dayjs(params.startAt).unix();
+    const endTimestamp = dayjs(params.endAt).unix();
 
     const schedules = await this.scheduleRepository
       .findAll({

@@ -193,9 +193,9 @@ export class Handlers {
         return message;
       }
       case SUB_COMMAND_LIST: {
-        const searchRange = this.handleListCommandImpl(body);
+        const { startAt, endAt } = this.handleListCommandImpl(body);
         const message = await this.commandService
-          .listCommandImpl(searchRange)
+          .listCommandImpl({ startAt, endAt })
           .catch((e) => {
             throw new Error(e);
           });
@@ -269,10 +269,8 @@ export class Handlers {
     )?.value as string | undefined;
 
     return {
-      searchRange: {
-        startAt: startAt ?? "",
-        endAt: endAt ?? "",
-      },
+      startAt: startAt ?? "",
+      endAt: endAt ?? "",
     };
   }
 
