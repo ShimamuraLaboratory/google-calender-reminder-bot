@@ -86,13 +86,11 @@ export const COMMANDS = {
           name: "start_at",
           description: "検索範囲の開始日時(YYYY-MM-DDTHH:mm)",
           type: 3,
-          required: false,
         },
         {
           name: "end_at",
           description: "検索範囲の終了日時(YYYY-MM-DDTHH:mm)",
           type: 3,
-          required: false,
         },
       ],
     },
