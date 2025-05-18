@@ -45,6 +45,7 @@ type MessageComponentObj = APIBaseInteraction<
 type InteractionObj = SlashCommandObj | MessageComponentObj;
 
 type EmbedResponseObj = {
+  content?: string;
   embeds: APIEmbed[];
 };
 
