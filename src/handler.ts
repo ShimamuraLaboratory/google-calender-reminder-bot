@@ -1,4 +1,8 @@
-import type { ICommandService } from "./services/commandService";
+import type {
+  ComponentObj,
+  ICommandService,
+  ModalObj,
+} from "./services/commandService";
 import type { ISubscribeService } from "./services/subscribeService";
 import type { APIBaseInteraction, APIEmbed } from "discord-api-types/v10";
 import { InteractionType } from "discord-api-types/v10";
@@ -10,6 +14,12 @@ import {
   SUB_COMMAND_SHOW,
   SUB_COMMANDS,
   SUB_COMMAND_LIST,
+  CUSTOM_ID_ADD_INPUTS_TITLE,
+  CUSTOM_ID_ADD_INPUTS_START_AT,
+  CUSTOM_ID_ADD_INPUTS_END_AT,
+  CUSTOM_ID_ADD_INPUTS_DESCRIPTION,
+  CUSTOM_ID_ADD_INPUTS_MEMBER_IDS,
+  CUSTOM_ID_ADD_INPUTS_ROLE_IDS,
 } from "./constant";
 import type {
   AddCommandParams,
@@ -18,6 +28,7 @@ import type {
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
 import dayjs from "dayjs";
+import type { IModalService } from "./services/modalService";
 
 type SlashCommandObj = APIBaseInteraction<
   InteractionType.ApplicationCommand,
@@ -42,7 +53,25 @@ type MessageComponentObj = APIBaseInteraction<
   }
 >;
 
-type InteractionObj = SlashCommandObj | MessageComponentObj;
+type ModalInteractionObj = APIBaseInteraction<
+  InteractionType.ModalSubmit,
+  {
+    custom_id: string;
+    components: {
+      type: number;
+      components: {
+        type: number;
+        custom_id: string;
+        value: string;
+      }[];
+    }[];
+  }
+>;
+
+type InteractionObj =
+  | SlashCommandObj
+  | MessageComponentObj
+  | ModalInteractionObj;
 
 type EmbedResponseObj = {
   content?: string;
@@ -52,32 +81,28 @@ type EmbedResponseObj = {
 // NOTE: show等セレクトメニューを伴うメッセージのレスポンス
 type MessageResponseObj = {
   content: string;
-  components?: {
-    type: number;
-    components: {
-      type: number;
-      custom_id: string;
-      minValues?: number;
-      maxValues?: number;
-      placeholder?: string;
-      options: {
-        value: string;
-        label: string;
-        emoji?: {
-          id?: string;
-          name?: string;
-        };
-      }[];
-    }[];
-  }[];
+  components?: ComponentObj[];
 };
 
-type InteractionResponseObj = EmbedResponseObj | MessageResponseObj;
+type ModalResponseObj = {
+  modal: ModalObj;
+};
+
+type InteractionResponseObj =
+  | EmbedResponseObj
+  | MessageResponseObj
+  | ModalResponseObj;
 
 export const isMessageComponentObj = (
   obj: InteractionObj,
 ): obj is MessageComponentObj => {
   return obj.type === InteractionType.MessageComponent;
+};
+
+export const isModalInteractionObj = (
+  obj: InteractionObj,
+): obj is ModalInteractionObj => {
+  return obj.type === InteractionType.ModalSubmit;
 };
 
 export const isMessageResponseObj = (
@@ -86,21 +111,30 @@ export const isMessageResponseObj = (
   return !!(obj as MessageResponseObj).components;
 };
 
+export const isModalResponseObj = (
+  obj: InteractionResponseObj,
+): obj is ModalResponseObj => {
+  return !!(obj as ModalResponseObj).modal;
+};
+
 export class Handlers {
   private commandService: ICommandService | undefined;
   private subscribeService: ISubscribeService | undefined;
   private interactionService: IInteractionService | undefined;
+  private modalService: IModalService | undefined;
   private fetchServerInfoService: IFetchServerInfoService | undefined;
 
   constructor(
     commandService?: ICommandService,
     subscribeService?: ISubscribeService,
     interactionService?: IInteractionService,
+    modalService?: IModalService,
     fetchServerInfoService?: IFetchServerInfoService,
   ) {
     this.commandService = commandService;
     this.subscribeService = subscribeService;
     this.interactionService = interactionService;
+    this.modalService = modalService;
     this.fetchServerInfoService = fetchServerInfoService;
   }
 
@@ -121,6 +155,51 @@ export class Handlers {
 
       if (!values || values.length === 0) {
         throw new Error("不正なイベントIDです");
+      }
+
+      // NOTE: CUSTOM_ID_ADD_INPUTS_MEMBER_IDSがcustomIdに含まれている場合
+      if (customId.includes(CUSTOM_ID_ADD_INPUTS_MEMBER_IDS)) {
+        const eventId = customId
+          .split(`${CUSTOM_ID_ADD_INPUTS_MEMBER_IDS}_`)
+          .slice(-1)[0];
+        if (!eventId) {
+          throw new Error("不正なイベントIDです");
+        }
+
+        const memberIds = values;
+
+        const message = await this.interactionService
+          .addInteractionImpl({
+            eventId,
+            memberIds,
+          })
+          .catch((e) => {
+            throw new Error(e);
+          });
+
+        return message;
+      }
+
+      if (customId.includes(CUSTOM_ID_ADD_INPUTS_ROLE_IDS)) {
+        const eventId = customId
+          .split(`${CUSTOM_ID_ADD_INPUTS_ROLE_IDS}_`)
+          .slice(-1)[0];
+        if (!eventId) {
+          throw new Error("不正なイベントIDです");
+        }
+
+        const roleIds = values;
+
+        const message = await this.interactionService
+          .addInteractionImpl({
+            eventId,
+            roleIds,
+          })
+          .catch((e) => {
+            throw new Error(e);
+          });
+
+        return message;
       }
 
       switch (customId) {
@@ -158,6 +237,61 @@ export class Handlers {
       }
     }
 
+    if (isModalInteractionObj(body)) {
+      if (!this.modalService) {
+        throw new Error("interactionService is not initialized");
+      }
+      if (!body.data) {
+        throw new Error("不正なリクエストです");
+      }
+
+      const { custom_id: customId } = body.data;
+      if (!customId) {
+        throw new Error("不正なリクエストです");
+      }
+      if (!body.data.components) {
+        throw new Error("不正なリクエストです");
+      }
+
+      const components = body.data?.components.map((component) => {
+        return component.components.map((c) => {
+          return {
+            customId: c.custom_id,
+            value: c.value,
+          };
+        });
+      });
+      const values = components.flat();
+
+      console.log("values", values);
+
+      const title = values?.find(
+        (option) => option.customId === CUSTOM_ID_ADD_INPUTS_TITLE,
+      )?.value;
+      const startAt = values?.find(
+        (option) => option.customId === CUSTOM_ID_ADD_INPUTS_START_AT,
+      )?.value;
+      const endAt = values?.find(
+        (option) => option.customId === CUSTOM_ID_ADD_INPUTS_END_AT,
+      )?.value;
+      const description = values?.find(
+        (option) => option.customId === CUSTOM_ID_ADD_INPUTS_DESCRIPTION,
+      )?.value;
+
+      const message = await this.modalService
+        .addModalImpl({
+          title: title as string,
+          startAt: startAt as string,
+          endAt: endAt as string,
+          description: description as string,
+        })
+        .catch((e) => {
+          throw new Error(e);
+        });
+
+      return message;
+    }
+
     const subCommand = body.data?.options?.[0]?.name;
 
     if (!SUB_COMMANDS.has(subCommand || "")) {
@@ -169,9 +303,8 @@ export class Handlers {
 
     switch (subCommand) {
       case SUB_COMMAND_ADD: {
-        const scheduleData = this.handleAddCommandImpl(body);
         const message = await this.commandService
-          .addCommandImpl(scheduleData)
+          .addCommandImpl()
           .catch((e) => {
             throw new Error(e);
           });
@@ -216,50 +349,6 @@ export class Handlers {
     await this.subscribeService.subscribeCommand(appId, guildId).catch((e) => {
       throw new Error(e);
     });
-  }
-
-  handleAddCommandImpl(body: SlashCommandObj): AddCommandParams {
-    const title = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "title",
-    )?.value;
-    if (!title) {
-      throw new Error("タイトルが指定されていません");
-    }
-
-    const startAt = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "start_at",
-    )?.value;
-    if (!startAt) {
-      throw new Error("開始日時が指定されていません");
-    }
-
-    const endAt = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "end_at",
-    )?.value;
-    if (!endAt) {
-      throw new Error("終了日時が指定されていません");
-    }
-
-    this.validateDate(startAt as string, endAt as string);
-
-    const description = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "description",
-    )?.value;
-    const remindDays = body.data?.options?.[0]?.options?.find(
-      (option) => option.name === "remind_days",
-    )?.value;
-
-    const scheduleData: AddCommandParams = {
-      scheduleData: {
-        title,
-        startAt,
-        endAt,
-        description,
-        remindDays: Number(remindDays),
-      },
-    };
-
-    return scheduleData;
   }
 
   handleListCommandImpl(body: SlashCommandObj): ListCommandParams {
