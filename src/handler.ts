@@ -13,6 +13,7 @@ import {
 import type { AddCommandParams } from "./services/commandService";
 import type { IFetchServerInfoService } from "./services/fetchServerInfoService";
 import type { IInteractionService } from "./services/interactionService";
+import dayjs from "dayjs";
 
 type SlashCommandObj = APIBaseInteraction<
   InteractionType.ApplicationCommand,
@@ -279,11 +280,13 @@ export class Handlers {
       throw new Error("終了日時は開始日時よりも後である必要があります");
     }
 
-    const currentYear = new Date().getFullYear();
-    if (start.getFullYear() <= currentYear) {
+    const currentDate = dayjs();
+    const _start = dayjs(start);
+    const _end = dayjs(end);
+    if (_start.isBefore(currentDate)) {
       throw new Error("開始日時は現在以降である必要があります");
     }
-    if (end.getFullYear() <= currentYear) {
+    if (_end.isBefore(currentDate)) {
       throw new Error("終了日時は現在以降である必要があります");
     }
   }
