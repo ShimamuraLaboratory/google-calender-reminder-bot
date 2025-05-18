@@ -143,7 +143,3 @@ const embedEvent = (event: MessageData) => {
   }
   return msg.join("");
 };
-
-const embedEvents = (events: MessageData[]) => {
-  return events.map((event) => embedEvent(event)).join("\n");
-};
