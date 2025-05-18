@@ -34,51 +34,36 @@ export type ListCommandParams = {
   endAt?: string;
 };
 
+export type ComponentObj = {
+  type: number;
+  components: {
+    type: number;
+    placeholder?: string;
+    custom_id: string;
+    minValues?: number;
+    maxValues?: number;
+    options: {
+      value: string;
+      label: string;
+      emoji?: {
+        id?: string;
+        name?: string;
+      };
+    }[];
+  }[];
+};
+
 export interface ICommandService {
   addCommandImpl(params: AddCommandParams): Promise<{
     embeds: APIEmbed[];
   }>;
   showCommandImpl(): Promise<{
     content: string;
-    components?: {
-      type: number;
-      components: {
-        type: number;
-        placeholder?: string;
-        custom_id: string;
-        minValues?: number;
-        maxValues?: number;
-        options: {
-          value: string;
-          label: string;
-          emoji?: {
-            id?: string;
-            name?: string;
-          };
-        }[];
-      }[];
-    }[];
+    components?: ComponentObj[];
   }>;
   deleteCommandImpl(): Promise<{
     content: string;
-    components?: {
-      type: number;
-      components: {
-        type: number;
-        custom_id: string;
-        minValues?: number;
-        maxValues?: number;
-        placeholder?: string;
-        options: {
-          value: string;
-          label: string;
-          emoji?: {
-            id?: string;
-            name?: string;
-          };
-        }[];
-      }[];
-    }[];
+    components?: ComponentObj[];
   }>;
   listCommandImpl(params: ListCommandParams): Promise<{
     embeds: APIEmbed[];
@@ -179,24 +164,7 @@ export class CommandService implements ICommandService {
 
   async showCommandImpl(): Promise<{
     content: string;
-    components: {
-      type: number;
-      components: {
-        type: number;
-        placeholder?: string;
-        custom_id: string;
-        minValues?: number;
-        maxValues?: number;
-        options: {
-          value: string;
-          label: string;
-          emoji?: {
-            id?: string;
-            name?: string;
-          };
-        }[];
-      }[];
-    }[];
+    components: ComponentObj[];
   }> {
     const message = "### イベントを選択してください \n \n";
 
@@ -245,24 +213,7 @@ export class CommandService implements ICommandService {
 
   async deleteCommandImpl(): Promise<{
     content: string;
-    components: {
-      type: number;
-      components: {
-        type: number;
-        custom_id: string;
-        minValues?: number;
-        maxValues?: number;
-        placeholder?: string;
-        options: {
-          value: string;
-          label: string;
-          emoji?: {
-            id?: string;
-            name?: string;
-          };
-        }[];
-      }[];
-    }[];
+    components: ComponentObj[];
   }> {
     const message = "### 削除するイベントを選択してください \n \n";
 
