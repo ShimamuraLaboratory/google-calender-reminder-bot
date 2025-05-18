@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import type { SubCommandType } from "@/constant";
 import type { APIEmbed } from "discord-api-types/v10";
+import type { Role } from "@/domain/entities/role";
+import type { Member } from "@/domain/entities/member";
 
 const ADD_EMBED_COLOR = 0x00ff00;
 const LIST_EMBED_COLOR = 0x800080;
@@ -17,16 +19,12 @@ const DELETE_CONTENT = "**カレンダーの予定が削除されました！**"
 type MessageData = {
   id: string;
   title: string;
-  startAt: string | number;
-  endAt: string | number;
+  startAt: number;
+  endAt: number;
   description?: string;
   url?: string;
-  options?: Options;
-};
-
-type Options = {
-  roleIds?: string[];
-  memberIds?: string[];
+  roles?: Role[];
+  members?: Member[];
 };
 
 type MessageObj = {
@@ -41,10 +39,18 @@ export const embeddedMessage = (
   if (Array.isArray(data)) {
     const baseMessages = embeddedMessageImpls[type]();
     const embeds = data.map((event) => {
+      const fields = createFields({
+        startAt: event.startAt,
+        endAt: event.endAt,
+        description: event.description,
+        roles: event.roles,
+        members: event.members,
+      });
+
       return {
         title: event.title,
-        description: embedEvent(event),
         color: LIST_EMBED_COLOR,
+        fields: fields,
       };
     });
 
@@ -56,7 +62,13 @@ export const embeddedMessage = (
   const baseMessage = embeddedMessageImpls[type]();
 
   baseMessage.embeds[0].title = data.title;
-  baseMessage.embeds[0].description = embedEvent(data);
+  baseMessage.embeds[0].fields = createFields({
+    startAt: data.startAt,
+    endAt: data.endAt,
+    description: data.description,
+    roles: data.roles,
+    members: data.members,
+  });
 
   return baseMessage;
 };
@@ -114,32 +126,47 @@ const embeddedMessageImpls: Record<SubCommandType, () => MessageObj> = {
   },
 };
 
-const embedEvent = (event: MessageData) => {
-  const msg = [] as string[];
-  // NOTE: YYYY年MM月DD日 HH:mm形式に変換
-  if (typeof event.startAt === "number" && typeof event.endAt === "number") {
-    // NOTE: dayjsはミリ単位の為, 秒単位に変換
-    event.startAt = event.startAt * 1000;
-    event.endAt = event.endAt * 1000;
-  }
-  const startAt = dayjs(event.startAt).format("YYYY年MM月DD日 HH:mm");
-  const endAt = dayjs(event.endAt).format("YYYY年MM月DD日 HH:mm");
+const createFields = (
+  params: Omit<MessageData, "id" | "title">,
+): APIEmbed["fields"] => {
+  const formattedStart = dayjs(params.startAt * 1000).format(
+    "YYYY年MM月DD日 HH:mm",
+  );
+  const formattedEnd = dayjs(params.endAt * 1000).format(
+    "YYYY年MM月DD日 HH:mm",
+  );
 
-  msg.push(`### 期間: ${startAt} ~ ${endAt} \n`);
-  msg.push(`イベントID: ${event.id} \n`);
-  if (event.description) {
-    msg.push(`詳細: ${event.description} \n`);
+  const fields = [
+    {
+      name: "開始日時",
+      value: `**${formattedStart}**`,
+    },
+    {
+      name: "終了日時",
+      value: `**${formattedEnd}**`,
+    },
+  ];
+
+  if (params.roles && params.roles.length > 0) {
+    fields.push({
+      name: "対象ロール",
+      value: `<@&${params.roles?.map((role) => role.roleId).join("> <@&")}>`,
+    });
   }
-  if (event.options) {
-    if (event.options.roleIds && event.options.roleIds.length > 0) {
-      msg.push(`ロール : @${event.options.roleIds.join(", @")} \n`);
-    }
-    if (event.options.memberIds && event.options.memberIds.length > 0) {
-      msg.push(`メンバー : @${event.options.memberIds.join(", @")} \n`);
-    }
+
+  if (params.members && params.members.length > 0) {
+    fields.push({
+      name: "対象メンバー",
+      value: `<@${params.members?.map((member) => member.memberId).join("> <@")}>`,
+    });
   }
-  if (event.url) {
-    msg.push(`[カレンダーで確認する](${event.url})`);
+
+  if (params.description) {
+    fields.push({
+      name: "説明",
+      value: params.description,
+    });
   }
-  return msg.join("");
+
+  return fields;
 };
