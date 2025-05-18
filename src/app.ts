@@ -88,6 +88,7 @@ app.post("/", verifyMiddleware, async (c) => {
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
+          content: response.content,
           embeds: response.embeds,
           flags: InteractionResponseFlags.EPHEMERAL,
         },
