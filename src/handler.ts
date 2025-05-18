@@ -280,10 +280,10 @@ export class Handlers {
     }
 
     const currentYear = new Date().getFullYear();
-    if (start.getFullYear() < currentYear) {
+    if (start.getFullYear() <= currentYear) {
       throw new Error("開始日時は現在以降である必要があります");
     }
-    if (end.getFullYear() < currentYear) {
+    if (end.getFullYear() <= currentYear) {
       throw new Error("終了日時は現在以降である必要があります");
     }
   }
