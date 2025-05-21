@@ -34,6 +34,7 @@ const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
     undefined,
     undefined,
     undefined,
+    undefined,
     fetchServerInfoService,
   );
 
