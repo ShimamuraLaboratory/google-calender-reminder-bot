@@ -93,8 +93,6 @@ rootContainer
   .to(InteractiveHandler);
 rootContainer.bind<ModalHandler>(TOKENS.ModalHandler).to(ModalHandler);
 
-const childContainer = new Container({ parent: rootContainer });
-
 type Var = {
   container: Container;
 };
@@ -102,6 +100,7 @@ type Var = {
 const app = new Hono<{ Bindings: Bindings; Variables: Var }>();
 
 app.use("*", async (c, next) => {
+  const childContainer = new Container({ parent: rootContainer });
   childContainer
     .bind<string>(TOKENS.DISCORD_APP_ID)
     .toConstantValue(c.env.DISCORD_APP_ID);
