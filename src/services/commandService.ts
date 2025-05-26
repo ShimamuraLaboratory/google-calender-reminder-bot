@@ -89,7 +89,6 @@ export interface ICommandService {
 @injectable()
 export class CommandService implements ICommandService {
   @inject(TOKENS.ScheduleRepository)
-  // eslint-disable-next-line no-unused-vars
   private scheduleRepository!: IScheduleRepository;
 
   async addCommandImpl(): Promise<{
