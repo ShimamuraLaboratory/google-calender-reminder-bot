@@ -63,7 +63,7 @@ const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
     .bind<DrizzleD1Database<typeof schema>>(TOKENS.D1_DATABASE)
     .toConstantValue(d1Database);
 
-  const handler = childContainer.get(CronHandler);
+  const handler = childContainer.get<CronHandler>(TOKENS.CronHandler);
 
   switch (event.cron) {
     case "0 * * * *": {
