@@ -1,20 +1,30 @@
 import type { IDiscordClient } from "@/domain/repositories/discord";
 import { COMMANDS } from "@/lib/commandSubscription";
+import { TOKENS } from "@/tokens";
 import type {
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
 } from "discord-api-types/v10";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class DiscordClient implements IDiscordClient {
+  @inject(TOKENS.DISCORD_TOKEN)
+  private token!: string;
+  @inject(TOKENS.DISCORD_APP_ID)
+  private appId!: string;
+  @inject(TOKENS.DISCORD_GUILD_ID)
+  private guildId!: string;
+
   private BASE_URL = "https://discord.com/api/v10";
   private config: {
     headers: Record<string, string>;
   };
 
-  constructor(token: string) {
+  constructor() {
     this.config = {
       headers: {
-        Authorization: `Bot ${token}`,
+        Authorization: `Bot ${this.token}`,
         "Content-Type": "application/json",
       },
     };
@@ -23,14 +33,11 @@ export class DiscordClient implements IDiscordClient {
   /**
    * Discordサーバー内のメンバー情報を取得するメソッド
    *
-   * @param guildId
    * @returns
    */
-  async fetchGuildMembers(
-    guildId: string,
-  ): Promise<RESTGetAPIGuildMembersResult> {
+  async fetchGuildMembers(): Promise<RESTGetAPIGuildMembersResult> {
     const response = await fetch(
-      `${this.BASE_URL}/guilds/${guildId}/members?limit=1000`,
+      `${this.BASE_URL}/guilds/${this.guildId}/members?limit=1000`,
       {
         method: "GET",
         headers: this.config.headers,
@@ -47,14 +54,16 @@ export class DiscordClient implements IDiscordClient {
   /**
    * Discordサーバー内のロール情報を取得するメソッド
    *
-   * @param guildId
    * @returns
    */
-  async fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult> {
-    const response = await fetch(`${this.BASE_URL}/guilds/${guildId}/roles`, {
-      method: "GET",
-      headers: this.config.headers,
-    });
+  async fetchGuildRoles(): Promise<RESTGetAPIGuildRolesResult> {
+    const response = await fetch(
+      `${this.BASE_URL}/guilds/${this.guildId}/roles`,
+      {
+        method: "GET",
+        headers: this.config.headers,
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch group roles: ${response.statusText}`);
@@ -67,13 +76,11 @@ export class DiscordClient implements IDiscordClient {
    * Discordのコマンドをサーバーに登録するメソッド
    *
    * @param commands
-   * @param appId
-   * @param guildId
    * @returns
    */
-  async subscribeCommand(appId: string, guildId: string): Promise<void> {
+  async subscribeCommand(): Promise<void> {
     const response = await fetch(
-      `${this.BASE_URL}/applications/${appId}/commands`,
+      `${this.BASE_URL}/applications/${this.appId}/commands`,
       {
         method: "POST",
         headers: this.config.headers,

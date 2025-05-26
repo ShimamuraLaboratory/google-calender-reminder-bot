@@ -4,7 +4,7 @@ import type {
 } from "discord-api-types/v10";
 
 export interface IDiscordClient {
-  fetchGuildMembers(guildId: string): Promise<RESTGetAPIGuildMembersResult>;
-  fetchGuildRoles(guildId: string): Promise<RESTGetAPIGuildRolesResult>;
-  subscribeCommand(appId: string, guildId: string): Promise<void>;
+  fetchGuildMembers(): Promise<RESTGetAPIGuildMembersResult>;
+  fetchGuildRoles(): Promise<RESTGetAPIGuildRolesResult>;
+  subscribeCommand(): Promise<void>;
 }

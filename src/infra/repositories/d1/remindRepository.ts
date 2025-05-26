@@ -1,14 +1,17 @@
 import type { Remind } from "@/domain/entities/remind";
 import { reminds, remindMember } from "@/db/schema";
-import BaseRepository from "./baseRepository";
 import { and, eq, inArray } from "drizzle-orm";
 import type { IRemindRepository } from "@/domain/repositories/reminds";
 import { newSchedule } from "@/domain/entities/schedule";
+import { inject, injectable } from "inversify";
+import { TOKENS } from "@/tokens";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type * as schema from "@/db/schema";
+@injectable()
+export class RemindRepository implements IRemindRepository {
+  @inject(TOKENS.D1_DATABASE)
+  public readonly db!: DrizzleD1Database<typeof schema>;
 
-export class RemindRepository
-  extends BaseRepository
-  implements IRemindRepository
-{
   async findById(id: string): Promise<Remind | undefined> {
     const res = await this.db.query.reminds.findFirst({
       where: (reminds, { eq }) => eq(reminds.id, id),

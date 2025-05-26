@@ -1,33 +1,27 @@
 import type { IDiscordClient } from "@/domain/repositories/discord";
 import type { IMemberRepository } from "@/domain/repositories/members";
 import type { IRoleRepository } from "@/domain/repositories/roles";
+import { TOKENS } from "@/tokens";
+import { inject, injectable } from "inversify";
 
 export interface IFetchServerInfoService {
-  fetchMembers(guildId: string): Promise<void>;
-  fetchRoles(guildId: string): Promise<void>;
+  fetchMembers(): Promise<void>;
+  fetchRoles(): Promise<void>;
 }
 
+@injectable()
 export class FetchServerInfoService implements IFetchServerInfoService {
-  private discordClient: IDiscordClient;
-  private memberRepository: IMemberRepository;
-  private roleRepository: IRoleRepository;
+  @inject(TOKENS.DiscordClient)
+  private discordClient!: IDiscordClient;
+  @inject(TOKENS.MemberRepository)
+  private memberRepository!: IMemberRepository;
+  @inject(TOKENS.RoleRepository)
+  private roleRepository!: IRoleRepository;
 
-  constructor(
-    discordClient: IDiscordClient,
-    memberRepository: IMemberRepository,
-    roleRepository: IRoleRepository,
-  ) {
-    this.discordClient = discordClient;
-    this.memberRepository = memberRepository;
-    this.roleRepository = roleRepository;
-  }
-
-  async fetchMembers(guildId: string): Promise<void> {
-    const members = await this.discordClient
-      .fetchGuildMembers(guildId)
-      .catch((e) => {
-        throw new Error(`Failed to fetch group members: ${e}`);
-      });
+  async fetchMembers(): Promise<void> {
+    const members = await this.discordClient.fetchGuildMembers().catch((e) => {
+      throw new Error(`Failed to fetch group members: ${e}`);
+    });
 
     const memberData = members
       .map((member) => {
@@ -131,12 +125,10 @@ export class FetchServerInfoService implements IFetchServerInfoService {
     }
   }
 
-  async fetchRoles(guildId: string): Promise<void> {
-    const roles = await this.discordClient
-      .fetchGuildRoles(guildId)
-      .catch((e) => {
-        throw new Error(`Failed to fetch group roles: ${e}`);
-      });
+  async fetchRoles(): Promise<void> {
+    const roles = await this.discordClient.fetchGuildRoles().catch((e) => {
+      throw new Error(`Failed to fetch group roles: ${e}`);
+    });
 
     const roleData = roles.map((role) => ({
       roleId: role.id,

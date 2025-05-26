@@ -1,10 +1,18 @@
 import type { Role } from "@/domain/entities/role";
 import { roleMember, roles, scheduleRole } from "@/db/schema";
-import BaseRepository from "./baseRepository";
 import { eq, inArray } from "drizzle-orm";
 import type { IRoleRepository } from "@/domain/repositories/roles";
+import { injectable } from "inversify";
+import { inject } from "inversify";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type * as schema from "@/db/schema";
+import { TOKENS } from "@/tokens";
 
-export class RoleRepository extends BaseRepository implements IRoleRepository {
+@injectable()
+export class RoleRepository implements IRoleRepository {
+  @inject(TOKENS.D1_DATABASE)
+  public readonly db!: DrizzleD1Database<typeof schema>;
+
   async findAll(): Promise<Role[]> {
     const res = await this.db.query.roles.findMany({
       with: {

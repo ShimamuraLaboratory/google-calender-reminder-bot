@@ -7,6 +7,8 @@ import {
   CUSTOM_ID_ADD_INPUTS_MEMBER_IDS,
   CUSTOM_ID_ADD_INPUTS_ROLE_IDS,
 } from "@/constant";
+import { inject, injectable } from "inversify";
+import { TOKENS } from "@/tokens";
 
 export interface IModalService {
   addModalImpl(params: {
@@ -20,12 +22,10 @@ export interface IModalService {
   }>;
 }
 
+@injectable()
 export class ModalService {
-  private scheduleRepository: IScheduleRepository;
-
-  constructor(scheduleRepository: IScheduleRepository) {
-    this.scheduleRepository = scheduleRepository;
-  }
+  @inject(TOKENS.ScheduleRepository)
+  private scheduleRepository!: IScheduleRepository;
 
   async addModalImpl({
     title,

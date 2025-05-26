@@ -6,6 +6,8 @@ import {
 import { embeddedMessage } from "@/lib/embedMessage";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import type { APIEmbed } from "discord-api-types/v10";
+import { inject, injectable } from "inversify";
+import { TOKENS } from "@/tokens";
 
 export interface IInteractionService {
   addInteractionImpl(params: {
@@ -23,11 +25,10 @@ export interface IInteractionService {
   }>;
 }
 
+@injectable()
 export class InteractionService implements IInteractionService {
-  private scheduleRepository: IScheduleRepository;
-  constructor(scheduleRepository: IScheduleRepository) {
-    this.scheduleRepository = scheduleRepository;
-  }
+  @inject(TOKENS.ScheduleRepository)
+  private scheduleRepository!: IScheduleRepository;
 
   async addInteractionImpl(params: {
     eventId: string;

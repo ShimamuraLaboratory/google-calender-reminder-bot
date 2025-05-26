@@ -1,14 +1,18 @@
 import type { Schedule } from "@/domain/entities/schedule";
 import { newSchedule } from "@/domain/entities/schedule";
 import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
-import BaseRepository from "./baseRepository";
 import { and, eq, inArray, gte, lte } from "drizzle-orm";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
+import { inject, injectable } from "inversify";
+import { TOKENS } from "@/tokens";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type * as schema from "@/db/schema";
 
-export class ScheduleRepository
-  extends BaseRepository
-  implements IScheduleRepository
-{
+@injectable()
+export class ScheduleRepository implements IScheduleRepository {
+  @inject(TOKENS.D1_DATABASE)
+  public readonly db!: DrizzleD1Database<typeof schema>;
+
   async findAll(params: {
     startAt?: number;
     endAt?: number;
