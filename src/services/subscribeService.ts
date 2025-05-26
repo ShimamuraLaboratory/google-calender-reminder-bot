@@ -1,18 +1,18 @@
 import type { IDiscordClient } from "@/domain/repositories/discord";
+import { TOKENS } from "@/tokens";
+import { inject, injectable } from "inversify";
 
 export interface ISubscribeService {
-  subscribeCommand(appId: string, guildId: string): Promise<void>;
+  subscribeCommand(): Promise<void>;
 }
 
+@injectable()
 export class SubscribeService implements ISubscribeService {
-  private discordClient: IDiscordClient;
+  @inject(TOKENS.DiscordClient)
+  private discordClient!: IDiscordClient;
 
-  constructor(discordClient: IDiscordClient) {
-    this.discordClient = discordClient;
-  }
-
-  async subscribeCommand(appId: string, guildId: string): Promise<void> {
-    await this.discordClient.subscribeCommand(appId, guildId).catch((err) => {
+  async subscribeCommand(): Promise<void> {
+    await this.discordClient.subscribeCommand().catch((err) => {
       throw new Error("サブコマンドの登録に失敗しました");
     });
   }

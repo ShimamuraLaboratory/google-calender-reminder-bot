@@ -1,13 +1,18 @@
-import BaseRepository from "./baseRepository";
 import type { Member } from "@/domain/entities/member";
 import { members, roleMember, scheduleMember, remindMember } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { IMemberRepository } from "@/domain/repositories/members";
+import { injectable } from "inversify";
+import { inject } from "inversify";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type * as schema from "@/db/schema";
+import { TOKENS } from "@/tokens";
 
-export class MemberRepository
-  extends BaseRepository
-  implements IMemberRepository
-{
+@injectable()
+export class MemberRepository implements IMemberRepository {
+  @inject(TOKENS.D1_DATABASE)
+  public readonly db!: DrizzleD1Database<typeof schema>;
+
   async findAll(): Promise<Member[]> {
     const res = await this.db.query.members.findMany({
       where: (members, { isNull }) => isNull(members.deletedAt),

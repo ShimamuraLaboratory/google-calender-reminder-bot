@@ -1,4 +1,3 @@
-import type { ICalendarClient } from "@/domain/repositories/calendar";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import { embeddedMessage } from "@/lib/embedMessage";
 import {
@@ -17,6 +16,8 @@ import {
   type APIEmbed,
 } from "discord-api-types/v10";
 import dayjs from "dayjs";
+import { inject, injectable } from "inversify";
+import { TOKENS } from "@/tokens";
 
 export type AddCommandParams = {
   scheduleData: {
@@ -85,11 +86,11 @@ export interface ICommandService {
   }>;
 }
 
+@injectable()
 export class CommandService implements ICommandService {
-  private scheduleRepository: IScheduleRepository;
-  constructor(scheduleRepository: IScheduleRepository) {
-    this.scheduleRepository = scheduleRepository;
-  }
+  @inject(TOKENS.ScheduleRepository)
+  // eslint-disable-next-line no-unused-vars
+  private scheduleRepository!: IScheduleRepository;
 
   async addCommandImpl(): Promise<{
     modal: ModalObj;
