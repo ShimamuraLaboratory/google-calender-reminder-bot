@@ -90,7 +90,7 @@ export type ReponseType = "MessageResponse" | "ModalResponse" | "EmbedResponse";
 export const isMessageResponseObj = (
   obj: InteractionResponse,
 ): obj is MessageResponse => {
-  return (obj as MessageResponse).content !== undefined;
+  return (obj as MessageResponse).components !== undefined;
 };
 export const isModalResponseObj = (
   obj: InteractionResponse,
