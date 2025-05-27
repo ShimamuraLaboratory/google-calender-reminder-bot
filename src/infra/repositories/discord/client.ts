@@ -2,6 +2,7 @@ import type { IDiscordClient } from "@/domain/repositories/discord";
 import { COMMANDS } from "@/lib/commandSubscription";
 import { TOKENS } from "@/tokens";
 import type {
+  APIEmbed,
   RESTGetAPIGuildMembersResult,
   RESTGetAPIGuildRolesResult,
 } from "discord-api-types/v10";
@@ -17,6 +18,35 @@ export class DiscordClient implements IDiscordClient {
   private guildId!: string;
 
   private BASE_URL = "https://discord.com/api/v10";
+
+  /**
+   * 指定チャンネルに対してメッセージを送信するメソッド
+   *
+   * @param channelId - メッセージを送信するチャンネルのID
+   */
+  async sendMessage(
+    channelId: string,
+    msgObj: { content: string; embeds: APIEmbed[] },
+  ): Promise<void> {
+    console.log(`[INFO] Sending message to channel ${channelId}...`);
+    const response = await fetch(
+      `${this.BASE_URL}/channels/${channelId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bot ${this.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(msgObj),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to send message: ${response.statusText}`);
+    }
+
+    console.log("[INFO] Message sent successfully.");
+  }
 
   /**
    * Discordサーバー内のメンバー情報を取得するメソッド
