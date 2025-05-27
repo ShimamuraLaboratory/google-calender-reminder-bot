@@ -25,7 +25,7 @@ export class ReminderService {
   private reminderChannelId!: string;
 
   async sendReminders(): Promise<void> {
-    const now = dayjs().unix(); // 現在のUNIXタイムスタンプをミリ秒単位で取得
+    const now = dayjs().unix(); // 現在のUNIXタイムスタンプを秒単位で取得
 
     const remindableSchedules = await this.scheduleRepository
       .findAbleToRemind(now)
@@ -48,7 +48,7 @@ export class ReminderService {
     };
 
     const remindDatas = remindableSchedules.map((schedule) => {
-      const untillDays = dayjs(schedule.startAt).diff(now, "day");
+      const untillDays = schedule.startAt - now; // 開始までの残り時間（秒単位）
       const embedMsg = generateRemindEmbed(untillDays, schedule);
 
       const memberIds =
@@ -81,7 +81,7 @@ export class ReminderService {
       throw new Error(`Failed to insert reminders: ${e}`);
     });
 
-    this.discordClient
+    await this.discordClient
       .sendMessage(this.reminderChannelId, msgObj)
       .catch((e) => {
         console.log("[ERROR] Failed to send reminders to Discord:", e);

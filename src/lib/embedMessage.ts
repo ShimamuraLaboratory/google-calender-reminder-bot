@@ -169,7 +169,7 @@ const createFields = (
 };
 
 export const generateRemindEmbed = (
-  untillDays: number,
+  untilDays: number,
   data: MessageData,
 ): APIEmbed => {
   const formattedStart = dayjs(data.startAt * 1000).format(
@@ -177,7 +177,8 @@ export const generateRemindEmbed = (
   );
   const formattedEnd = dayjs(data.endAt * 1000).format("YYYY年MM月DD日 HH:mm");
 
-  const title = `${data.title} まであと ${untillDays} 日です！`;
+  // NOTE: untillDaysが0の場合と1以上の場合でタイトルを変える
+  const title = getTitleUntilTime(data.title, untilDays);
 
   const fields: APIEmbed["fields"] = [
     {
@@ -220,4 +221,20 @@ export const generateRemindEmbed = (
     color: REMIND_EMBED_COLOR,
     fields,
   } as APIEmbed;
+};
+
+const getTitleUntilTime = (title: string, untilUnix: number): string => {
+  // 残りが日単位なのか時間単位なのかを判定
+  const days = Math.floor(untilUnix / (24 * 60 * 60));
+  const hours = Math.floor((untilUnix % (24 * 60 * 60)) / (60 * 60));
+
+  if (days > 0) {
+    return `${title}まで残り${days}日です！`;
+  }
+
+  if (hours > 0) {
+    return `${title}まで残り${hours}時間です！`;
+  }
+
+  return `${title}が開始されました！`;
 };
