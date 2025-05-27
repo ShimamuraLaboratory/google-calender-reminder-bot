@@ -15,6 +15,7 @@ export interface IModalService {
     title: string;
     startAt: string;
     endAt: string;
+    remindDays?: number;
     description?: string;
   }): Promise<{
     content: string;
@@ -31,11 +32,13 @@ export class ModalService {
     title,
     startAt,
     endAt,
+    remindDays = 0,
     description,
   }: {
     title: string;
     startAt: string;
     endAt: string;
+    remindDays?: number;
     description?: string;
   }): Promise<{
     content: string;
@@ -49,6 +52,7 @@ export class ModalService {
     const schedule = {
       id: eventId,
       title,
+      remindDays,
       startAt: unixStartAt,
       endAt: unixEndAt,
       description,
