@@ -28,7 +28,7 @@ export class DiscordClient implements IDiscordClient {
     channelId: string,
     msgObj: { content: string; embeds: APIEmbed[] },
   ): Promise<void> {
-    console.log(`[INFO] Sending message to channel ${channelId}...`);
+    console.log("[INFO] Sending message to channel...");
     const response = await fetch(
       `${this.BASE_URL}/channels/${channelId}/messages`,
       {
