@@ -64,6 +64,13 @@
       "when": 1747376063101,
       "tag": "0008_faithful_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1748336950008,
+      "tag": "0009_sad_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

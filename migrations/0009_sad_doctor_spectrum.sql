@@ -1,0 +1,1 @@
+ALTER TABLE `reminds` DROP COLUMN `sended_at`;
