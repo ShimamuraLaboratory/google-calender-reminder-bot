@@ -17,30 +17,20 @@ export class DiscordClient implements IDiscordClient {
   private guildId!: string;
 
   private BASE_URL = "https://discord.com/api/v10";
-  private config: {
-    headers: Record<string, string>;
-  };
-
-  constructor() {
-    this.config = {
-      headers: {
-        Authorization: `Bot ${this.token}`,
-        "Content-Type": "application/json",
-      },
-    };
-  }
 
   /**
    * Discordサーバー内のメンバー情報を取得するメソッド
-   *
-   * @returns
    */
   async fetchGuildMembers(): Promise<RESTGetAPIGuildMembersResult> {
+    console.log("[INFO] Fetching members from Discord...");
     const response = await fetch(
       `${this.BASE_URL}/guilds/${this.guildId}/members?limit=1000`,
       {
         method: "GET",
-        headers: this.config.headers,
+        headers: {
+          Authorization: `Bot ${this.token}`,
+          "Content-Type": "application/json",
+        },
       },
     );
 
@@ -53,15 +43,17 @@ export class DiscordClient implements IDiscordClient {
 
   /**
    * Discordサーバー内のロール情報を取得するメソッド
-   *
-   * @returns
    */
   async fetchGuildRoles(): Promise<RESTGetAPIGuildRolesResult> {
+    console.log("[INFO] Fetching roles from Discord...");
     const response = await fetch(
       `${this.BASE_URL}/guilds/${this.guildId}/roles`,
       {
         method: "GET",
-        headers: this.config.headers,
+        headers: {
+          Authorization: `Bot ${this.token}`,
+          "Content-Type": "application/json",
+        },
       },
     );
 
@@ -74,16 +66,17 @@ export class DiscordClient implements IDiscordClient {
 
   /**
    * Discordのコマンドをサーバーに登録するメソッド
-   *
-   * @param commands
-   * @returns
    */
   async subscribeCommand(): Promise<void> {
+    console.log("[INFO] Subscribing commands to Discord...");
     const response = await fetch(
       `${this.BASE_URL}/applications/${this.appId}/commands`,
       {
         method: "POST",
-        headers: this.config.headers,
+        headers: {
+          Authorization: `Bot ${this.token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(COMMANDS),
       },
     );

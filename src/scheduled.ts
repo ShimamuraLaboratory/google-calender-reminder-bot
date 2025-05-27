@@ -67,11 +67,11 @@ const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
 
   switch (event.cron) {
     case "0 * * * *": {
-      await handler.handleFetchRoleInfo();
+      await handler.handleFetchMemberInfo();
       break;
     }
     case "0 0 * * *": {
-      await handler.handleFetchMemberInfo();
+      await handler.handleFetchRoleInfo();
       break;
     }
   }
