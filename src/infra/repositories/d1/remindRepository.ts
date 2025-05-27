@@ -1,12 +1,13 @@
 import type { Remind } from "@/domain/entities/remind";
 import { reminds, remindMember } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { IRemindRepository } from "@/domain/repositories/reminds";
 import { newSchedule } from "@/domain/entities/schedule";
 import { inject, injectable } from "inversify";
 import { TOKENS } from "@/tokens";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type * as schema from "@/db/schema";
+
 @injectable()
 export class RemindRepository implements IRemindRepository {
   @inject(TOKENS.D1_DATABASE)
@@ -34,7 +35,6 @@ export class RemindRepository implements IRemindRepository {
       id: res.id,
       scheduleId: res.scheduleId,
       text: res.text,
-      sendedAt: res.sendedAt,
       createdAt: res.createdAt,
       updatedAt: res.updatedAt,
       deletedAt: res.deletedAt,
@@ -96,7 +96,6 @@ export class RemindRepository implements IRemindRepository {
       return {
         data: {
           ...data,
-          id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           deletedAt: null,
