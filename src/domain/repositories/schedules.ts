@@ -8,6 +8,7 @@ export interface IScheduleRepository {
   findById(id: string): Promise<Schedule | undefined>;
   findByEventId(id: string): Promise<Schedule | undefined>;
   findByRoleIds(roleIds: string[]): Promise<Schedule[]>;
+  findAbleToRemind(now: number): Promise<Schedule[]>;
   insert(
     data: Omit<Schedule, "createdAt" | "updatedAt" | "deletedAt">,
     memberIds?: string[],

@@ -7,6 +7,7 @@ import { inject, injectable } from "inversify";
 import { TOKENS } from "@/tokens";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type * as schema from "@/db/schema";
+import { sql } from "drizzle-orm";
 
 @injectable()
 export class ScheduleRepository implements IScheduleRepository {
@@ -165,6 +166,46 @@ export class ScheduleRepository implements IScheduleRepository {
       });
     });
 
+    return formattedRes;
+  }
+
+  async findAbleToRemind(now: number): Promise<Schedule[]> {
+    const res = await this.db.query.schedules.findMany({
+      where: (schedules, { and, isNull, gte }) =>
+        and(
+          isNull(schedules.deletedAt),
+          gte(schedules.startAt, now),
+          // NOTE: start_at - remind_days * 86400 >= now
+          sql`${schedules.startAt} - ${schedules.remindDays} * 86400 >= ${now}`,
+        ),
+      with: {
+        reminds: {
+          where: (reminds, { isNull }) => isNull(reminds.deletedAt),
+        },
+        scheduleMembers: {
+          with: {
+            member: {},
+          },
+        },
+        scheduleRoles: {
+          with: {
+            role: {},
+          },
+        },
+      },
+      orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
+    });
+
+    const formattedRes: Schedule[] = res.map((schedule) => {
+      const { scheduleRoles, scheduleMembers, ...rest } = schedule;
+      return newSchedule({
+        ...rest,
+        members: scheduleMembers.map((scheduleMember) => ({
+          ...scheduleMember.member,
+        })),
+        roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
+      });
+    });
     return formattedRes;
   }
 
