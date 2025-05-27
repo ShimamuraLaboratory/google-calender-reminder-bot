@@ -30,7 +30,8 @@ erDiagram
         text id PK "リマインダーのID, UUID"
         text text "リマインダー本文"
         text schedule_id FK "予定のID"
-        text sended_at "送信日時"
+        text created_at
+        text updated_at
         text deleted_at
     }
 

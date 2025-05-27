@@ -13,6 +13,12 @@ import type { IDiscordClient } from "./domain/repositories/discord";
 import { TOKENS } from "./tokens";
 import type { IMemberRepository } from "./domain/repositories/members";
 import type { IRoleRepository } from "./domain/repositories/roles";
+import type { IReminderService } from "./services/reminderService";
+import { ReminderService } from "./services/reminderService";
+import type { IRemindRepository } from "./domain/repositories/reminds";
+import { RemindRepository } from "./infra/repositories/d1/remindRepository";
+import type { IScheduleRepository } from "./domain/repositories/schedules";
+import { ScheduleRepository } from "./infra/repositories/d1/schedulesRepository";
 
 type Bindings = {
   DISCORD_PUBLIC_KEY: string;
@@ -31,8 +37,17 @@ rootContainer
   .to(MemberRepository);
 rootContainer.bind<IRoleRepository>(TOKENS.RoleRepository).to(RoleRepository);
 rootContainer
+  .bind<IRemindRepository>(TOKENS.RemindRepository)
+  .to(RemindRepository);
+rootContainer
+  .bind<IScheduleRepository>(TOKENS.ScheduleRepository)
+  .to(ScheduleRepository);
+rootContainer
   .bind<IFetchServerInfoService>(TOKENS.FetchServerInfoService)
   .to(FetchServerInfoService);
+rootContainer
+  .bind<IReminderService>(TOKENS.ReminderService)
+  .to(ReminderService);
 rootContainer.bind<CronHandler>(TOKENS.CronHandler).to(CronHandler);
 
 const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
@@ -72,6 +87,10 @@ const scheduled: ExportedHandler<Bindings>["scheduled"] = async (
     }
     case "0 0 * * *": {
       await handler.handleFetchRoleInfo();
+      break;
+    }
+    case "*/1 * * * *": {
+      await handler.handleSendReminders();
       break;
     }
   }

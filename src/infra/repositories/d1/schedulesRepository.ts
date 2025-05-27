@@ -7,6 +7,7 @@ import { inject, injectable } from "inversify";
 import { TOKENS } from "@/tokens";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type * as schema from "@/db/schema";
+import { sql } from "drizzle-orm";
 
 @injectable()
 export class ScheduleRepository implements IScheduleRepository {
@@ -165,6 +166,62 @@ export class ScheduleRepository implements IScheduleRepository {
       });
     });
 
+    return formattedRes;
+  }
+
+  async findAbleToRemind(now: number): Promise<Schedule[]> {
+    const res = await this.db.query.schedules.findMany({
+      where: (schedules, { and, isNull, isNotNull, gte, or }) =>
+        and(
+          isNull(schedules.deletedAt),
+          gte(schedules.startAt, now),
+          or(
+            and(
+              isNotNull(schedules.remindDays),
+              sql`${schedules.startAt} - ${schedules.remindDays} * 86400 <= ${now}`,
+            ),
+            and(isNull(schedules.remindDays), eq(schedules.startAt, now)),
+          ),
+        ),
+      with: {
+        reminds: {
+          where: (reminds, { isNull }) => isNull(reminds.deletedAt),
+        },
+        scheduleMembers: {
+          with: {
+            member: {},
+          },
+        },
+        scheduleRoles: {
+          with: {
+            role: {},
+          },
+        },
+      },
+      orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
+    });
+
+    const formattedRes: Schedule[] = res
+      .map((schedule) => {
+        // NOTE: remindされているスケジュールは除外
+        // 分単位で比較するため、now と schedule.startAt を 60 で割って整数に変換する
+        if (
+          schedule.reminds.length > 0 &&
+          Math.floor(now / 60) < Math.floor(schedule.startAt / 60)
+        ) {
+          return undefined;
+        }
+
+        const { scheduleRoles, scheduleMembers, ...rest } = schedule;
+        return newSchedule({
+          ...rest,
+          members: scheduleMembers.map((scheduleMember) => ({
+            ...scheduleMember.member,
+          })),
+          roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
+        });
+      })
+      .filter((schedule): schedule is Schedule => schedule !== undefined);
     return formattedRes;
   }
 

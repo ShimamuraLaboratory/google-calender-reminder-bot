@@ -3,6 +3,7 @@ import { embeddedMessage } from "@/lib/embedMessage";
 import {
   CUSTOM_ID_ADD_INPUTS_DESCRIPTION,
   CUSTOM_ID_ADD_INPUTS_END_AT,
+  CUSTOM_ID_ADD_INPUTS_REMIND_DAYS,
   CUSTOM_ID_ADD_INPUTS_START_AT,
   CUSTOM_ID_ADD_INPUTS_TITLE,
   CUSTOM_ID_ADD_MODAL,
@@ -140,6 +141,21 @@ export class CommandService implements ICommandService {
               min_length: 1,
               max_length: 100,
               required: true,
+            },
+          ],
+        },
+        {
+          type: ComponentType.ActionRow,
+          components: [
+            {
+              type: ComponentType.TextInput,
+              custom_id: CUSTOM_ID_ADD_INPUTS_REMIND_DAYS,
+              label: "リマインド日数",
+              placeholder: "リマインドを行う日数を入力してください（任意）",
+              style: TextInputStyle.Short,
+              min_length: 0,
+              max_length: 3,
+              required: false,
             },
           ],
         },

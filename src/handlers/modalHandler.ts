@@ -5,6 +5,7 @@ import type { InteractionResponse, ModalInteractionBody } from "./type";
 import {
   CUSTOM_ID_ADD_INPUTS_DESCRIPTION,
   CUSTOM_ID_ADD_INPUTS_END_AT,
+  CUSTOM_ID_ADD_INPUTS_REMIND_DAYS,
   CUSTOM_ID_ADD_INPUTS_START_AT,
   CUSTOM_ID_ADD_INPUTS_TITLE,
 } from "@/constant";
@@ -51,9 +52,13 @@ export class ModalHandler extends BaseHandler {
     const endAt = values?.find(
       (option) => option.customId === CUSTOM_ID_ADD_INPUTS_END_AT,
     )?.value;
+    const remindDays = values?.find(
+      (option) => option.customId === CUSTOM_ID_ADD_INPUTS_REMIND_DAYS,
+    )?.value;
     const description = values?.find(
       (option) => option.customId === CUSTOM_ID_ADD_INPUTS_DESCRIPTION,
     )?.value;
+    const remindDaysNum = remindDays ? Number.parseInt(remindDays, 10) : 0;
 
     this.validateDates(startAt ?? "", endAt ?? "");
 
@@ -62,6 +67,7 @@ export class ModalHandler extends BaseHandler {
         title: title as string,
         startAt: startAt as string,
         endAt: endAt as string,
+        remindDays: remindDaysNum,
         description: description as string,
       })
       .catch((e) => {
