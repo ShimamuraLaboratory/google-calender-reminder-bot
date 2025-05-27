@@ -82,82 +82,51 @@ export class RemindRepository implements IRemindRepository {
     return formattedRes;
   }
 
+  /**
+   * リマインドデータをDBに挿入するメソッド
+   */
   async insert(
-    data: Omit<Remind, "createdAt" | "updatedAt" | "deletedAt">,
-    memberIds?: string[],
+    params: {
+      data: Omit<Remind, "createdAt" | "updatedAt" | "deletedAt">;
+      memberIds?: string[];
+    }[],
   ): Promise<void> {
-    const formattedData = {
-      ...data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      deletedAt: null,
-    };
+    const formattedData = params.map((param) => {
+      const { data, memberIds } = param;
+      return {
+        data: {
+          ...data,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          deletedAt: null,
+        },
+        memberIds: memberIds || [],
+      };
+    });
 
-    await this.db.insert(reminds).values(formattedData).execute();
+    await this.db
+      .insert(reminds)
+      .values(formattedData.map((d) => d.data))
+      .execute();
 
     // NOTE: ユーザーとリマインドを紐づけ
-    if (memberIds) {
-      const formattedRemindMember = memberIds.map((memberId) => ({
-        memberId,
-        remindId: formattedData.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-      await this.db
-        .insert(remindMember)
-        .values(formattedRemindMember)
-        .execute();
-    }
-  }
-  async update(
-    id: string,
-    data: Omit<Remind, "createdAt" | "updatedAt" | "deletedAt">,
-    newMemberIds?: string[],
-  ): Promise<void> {
-    await this.db.update(reminds).set(data).where(eq(reminds.id, id)).execute();
-
-    // NOTE: リレーションの更新
-    if (newMemberIds) {
-      const oldRemindMembers = await this.db.query.remindMember.findMany({
-        where: (remindMember, { eq }) => eq(remindMember.remindId, id),
-      });
-      const oldMemberIds = oldRemindMembers.map(
-        (remindMember) => remindMember.memberId,
-      );
-      const newMemberIdsSet = new Set(newMemberIds);
-      const oldMemberIdsSet = new Set(oldMemberIds);
-      const toInsert = newMemberIds.filter(
-        (memberId) => !oldMemberIdsSet.has(memberId),
-      );
-      const toDelete = oldMemberIds.filter(
-        (memberId) => !newMemberIdsSet.has(memberId),
-      );
-      const formattedRemindMember = toInsert.map((memberId) => ({
-        memberId,
-        remindId: id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-
-      if (formattedRemindMember.length > 0) {
+    for (const param of formattedData) {
+      if (param.memberIds.length > 0) {
+        const formattedRemindMember = param.memberIds.map((memberId) => ({
+          memberId,
+          remindId: param.data.id,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
         await this.db
           .insert(remindMember)
           .values(formattedRemindMember)
           .execute();
       }
-      if (toDelete.length > 0) {
-        await this.db
-          .delete(remindMember)
-          .where(
-            and(
-              eq(remindMember.remindId, id),
-              inArray(remindMember.memberId, toDelete),
-            ),
-          )
-          .execute();
-      }
     }
   }
+
   async delete(id: string): Promise<void> {
     await this.db
       .update(reminds)
