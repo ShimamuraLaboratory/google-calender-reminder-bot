@@ -185,7 +185,9 @@ export class CommandService implements ICommandService {
   async listCommandImpl(params: ListCommandParams): Promise<{
     embeds: APIEmbed[];
   }> {
-    const startTimestamp = dayjs(params.startAt).unix();
+    const startTimestamp = params.startAt
+      ? dayjs(params.startAt).unix()
+      : dayjs().unix() + 9 * 60 * 60; // JST (UTC+9)
     const endTimestamp = params.endAt ? dayjs(params.endAt).unix() : undefined;
 
     const schedules = await this.scheduleRepository
@@ -208,7 +210,7 @@ export class CommandService implements ICommandService {
   }> {
     const message = "### イベントを選択してください \n \n";
 
-    const currentDate = dayjs().unix();
+    const currentDate = dayjs().unix() + 9 * 60 * 60; // JST (UTC+9)
 
     const schedules = await this.scheduleRepository
       .findAll({
@@ -257,7 +259,7 @@ export class CommandService implements ICommandService {
   }> {
     const message = "### 削除するイベントを選択してください \n \n";
 
-    const currentDate = dayjs().unix();
+    const currentDate = dayjs().unix() + 9 * 60 * 60; // JST (UTC+9)
 
     const schedules = await this.scheduleRepository
       .findAll({

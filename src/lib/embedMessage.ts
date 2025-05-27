@@ -169,7 +169,7 @@ const createFields = (
 };
 
 export const generateRemindEmbed = (
-  untilDays: number,
+  now: number,
   data: MessageData,
 ): APIEmbed => {
   const formattedStart = dayjs(data.startAt * 1000).format(
@@ -178,7 +178,7 @@ export const generateRemindEmbed = (
   const formattedEnd = dayjs(data.endAt * 1000).format("YYYY年MM月DD日 HH:mm");
 
   // NOTE: untillDaysが0の場合と1以上の場合でタイトルを変える
-  const title = getTitleUntilTime(data.title, untilDays);
+  const title = getTitleUntilTime(data.title, data.startAt, now);
 
   const fields: APIEmbed["fields"] = [
     {
@@ -223,17 +223,42 @@ export const generateRemindEmbed = (
   } as APIEmbed;
 };
 
-const getTitleUntilTime = (title: string, untilUnix: number): string => {
+const getTitleUntilTime = (
+  title: string,
+  start: number,
+  now: number,
+): string => {
   // 残りが日単位なのか時間単位なのかを判定
-  const days = Math.floor(untilUnix / (24 * 60 * 60));
-  const hours = Math.floor((untilUnix % (24 * 60 * 60)) / (60 * 60));
+  const _start = dayjs(start * 1000);
+  const _now = dayjs(now * 1000);
 
-  if (days > 0) {
-    return `${title}まで残り${days}日です！`;
+  console.log(
+    `[DEBUG] getTitleUntilTime: start=${_start.format(
+      "YYYY-MM-DD HH:mm:ss",
+    )}, now=${_now.format("YYYY-MM-DD HH:mm:ss")}`,
+  );
+
+  const diffDays = _start.diff(_now, "day");
+  const diffHours = _start.diff(_now, "hour");
+  const diffMinutes = _start.diff(_now, "minute");
+
+  if (diffDays < 0) {
+    return `${title}は終了しました。`;
+  }
+  if (diffDays === 0 && diffHours === 0 && diffMinutes === 0) {
+    return `${title}が開始されました！`;
   }
 
-  if (hours > 0) {
-    return `${title}まで残り${hours}時間です！`;
+  if (diffDays > 0) {
+    return `${title}まで残り${diffDays}日です！`;
+  }
+
+  if (diffHours > 0) {
+    return `${title}まで残り${diffHours}時間です！`;
+  }
+
+  if (diffMinutes > 0) {
+    return `${title}まで残り${diffMinutes}分です！`;
   }
 
   return `${title}が開始されました！`;
