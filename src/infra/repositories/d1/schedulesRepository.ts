@@ -171,11 +171,17 @@ export class ScheduleRepository implements IScheduleRepository {
 
   async findAbleToRemind(now: number): Promise<Schedule[]> {
     const res = await this.db.query.schedules.findMany({
-      where: (schedules, { and, isNull, gte }) =>
+      where: (schedules, { and, isNull, isNotNull, gte, or }) =>
         and(
           isNull(schedules.deletedAt),
           gte(schedules.startAt, now),
-          sql`${schedules.startAt} - ${schedules.remindDays} * 86400 <= ${now}`,
+          or(
+            and(
+              isNotNull(schedules.remindDays),
+              sql`${schedules.startAt} - ${schedules.remindDays} * 86400 <= ${now}`,
+            ),
+            and(isNull(schedules.remindDays), eq(schedules.startAt, now)),
+          ),
         ),
       with: {
         reminds: {
