@@ -9,6 +9,7 @@ const LIST_EMBED_COLOR = 0x800080;
 const SHOW_EMBED_COLOR = 0x00ffff;
 const UPDATE_EMBED_COLOR = 0x0000ff;
 const DELETE_EMBED_COLOR = 0xff0000;
+const REMIND_EMBED_COLOR = 0xffff00;
 
 const ADD_CONTENT = "**イベントを追加しました！**";
 const LIST_CONTENT = "**イベント一覧です！**";
@@ -79,7 +80,6 @@ const embeddedMessageImpls: Record<SubCommandType, () => MessageObj> = {
       content: ADD_CONTENT,
       embeds: [
         {
-          // NOTE: 黄緑色
           color: ADD_EMBED_COLOR,
         },
       ],
@@ -96,7 +96,6 @@ const embeddedMessageImpls: Record<SubCommandType, () => MessageObj> = {
       content: SHOW_CONTENT,
       embeds: [
         {
-          // NOTE: 水色
           color: SHOW_EMBED_COLOR,
         },
       ],
@@ -107,7 +106,6 @@ const embeddedMessageImpls: Record<SubCommandType, () => MessageObj> = {
       content: UPDATE_CONTENT,
       embeds: [
         {
-          // NOTE: 青色
           color: UPDATE_EMBED_COLOR,
         },
       ],
@@ -118,7 +116,6 @@ const embeddedMessageImpls: Record<SubCommandType, () => MessageObj> = {
       content: DELETE_CONTENT,
       embeds: [
         {
-          // NOTE: 赤色
           color: DELETE_EMBED_COLOR,
         },
       ],
@@ -169,4 +166,58 @@ const createFields = (
   }
 
   return fields;
+};
+
+export const generateRemindEmbed = (
+  untillDays: number,
+  data: MessageData,
+): APIEmbed => {
+  const formattedStart = dayjs(data.startAt * 1000).format(
+    "YYYY年MM月DD日 HH:mm",
+  );
+  const formattedEnd = dayjs(data.endAt * 1000).format("YYYY年MM月DD日 HH:mm");
+
+  const title = `${data.title} まであと ${untillDays} 日です！`;
+
+  const fields: APIEmbed["fields"] = [
+    {
+      name: "イベント名",
+      value: `**${data.title}**`,
+    },
+    {
+      name: "開始日時",
+      value: `**${formattedStart}**`,
+    },
+    {
+      name: "終了日時",
+      value: `**${formattedEnd}**`,
+    },
+  ];
+
+  if (data.members && data.members.length > 0) {
+    fields.push({
+      name: "対象メンバー",
+      value: `<@${data.members.map((member) => member.memberId).join("> <@")}>`,
+    });
+  }
+
+  if (data.roles && data.roles.length > 0) {
+    fields.push({
+      name: "対象ロール",
+      value: `<@&${data.roles.map((role) => role.roleId).join("> <@&")}>`,
+    });
+  }
+
+  if (data.description) {
+    fields.push({
+      name: "説明",
+      value: data.description,
+    });
+  }
+
+  return {
+    title,
+    color: REMIND_EMBED_COLOR,
+    fields,
+  } as APIEmbed;
 };
