@@ -25,7 +25,8 @@ export class ReminderService {
   private reminderChannelId!: string;
 
   async sendReminders(): Promise<void> {
-    const now = dayjs().unix(); // 現在のUNIXタイムスタンプを秒単位で取得
+    // NOTE: YYYY-MM-DD HH:00の形式で現在の時刻を取得
+    const now = dayjs().startOf("minutes").unix() + 9 * 60 * 60; // JST (UTC+9)
 
     const remindableSchedules = await this.scheduleRepository
       .findAbleToRemind(now)
@@ -48,8 +49,11 @@ export class ReminderService {
     };
 
     const remindDatas = remindableSchedules.map((schedule) => {
-      const untillDays = schedule.startAt - now; // 開始までの残り時間（秒単位）
-      const embedMsg = generateRemindEmbed(untillDays, schedule);
+      console.log(
+        `[DEBUG] Start At ${schedule.startAt}, End At ${schedule.endAt} Now ${now}`,
+      );
+
+      const embedMsg = generateRemindEmbed(now, schedule);
 
       const memberIds =
         schedule.members?.map((member) => member.memberId) || [];

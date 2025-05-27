@@ -1,6 +1,6 @@
 import type { Schedule } from "@/domain/entities/schedule";
 import { newSchedule } from "@/domain/entities/schedule";
-import { scheduleMember, scheduleRole, schedules } from "@/db/schema";
+import { scheduleMember, scheduleRole, schedules, reminds } from "@/db/schema";
 import { and, eq, inArray, gte, lte } from "drizzle-orm";
 import type { IScheduleRepository } from "@/domain/repositories/schedules";
 import { inject, injectable } from "inversify";
@@ -171,17 +171,35 @@ export class ScheduleRepository implements IScheduleRepository {
 
   async findAbleToRemind(now: number): Promise<Schedule[]> {
     const res = await this.db.query.schedules.findMany({
-      where: (schedules, { and, isNull, isNotNull, gte, or }) =>
+      where: (schedules, { and, isNull }) =>
         and(
           isNull(schedules.deletedAt),
-          gte(schedules.startAt, now),
-          or(
-            and(
-              isNotNull(schedules.remindDays),
-              sql`${schedules.startAt} - ${schedules.remindDays} * 86400 <= ${now}`,
-            ),
-            and(isNull(schedules.remindDays), eq(schedules.startAt, now)),
-          ),
+          // NOTE: remindDaysが存在するものはremindsが既に2つ以上紐づいているものは除外し, remindDaysが存在しないものはremindsが紐づいていないものを取得
+          sql`(
+            (
+              (schedules.remind_days IS NULL
+                AND schedules.start_at = ${now}
+                AND (SELECT COUNT(*) FROM reminds 
+                       WHERE reminds.schedule_id = schedules.id 
+                         AND reminds.deleted_at IS NULL) = 0)
+              OR
+              (schedules.remind_days IS NOT NULL
+                AND (
+                  ((schedules.start_at - schedules.remind_days * 86400) < ${now}
+                    AND (SELECT COUNT(*) FROM reminds
+                           WHERE reminds.schedule_id = schedules.id 
+                             AND reminds.deleted_at IS NULL) = 0
+                  )
+                  OR (
+                    schedules.start_at = ${now}
+                    AND (SELECT COUNT(*) FROM reminds 
+                           WHERE reminds.schedule_id = schedules.id 
+                             AND reminds.deleted_at IS NULL) = 1
+                  )
+                )
+              )
+            )
+          )`,
         ),
       with: {
         reminds: {
@@ -201,26 +219,17 @@ export class ScheduleRepository implements IScheduleRepository {
       orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
     });
 
-    const formattedRes: Schedule[] = res
-      .map((schedule) => {
-        // NOTE: 既にremindされており, まだ開始日時でないスケジュールは除外
-        if (
-          schedule.reminds.length > 0 &&
-          Math.floor(now / 60) < Math.floor(schedule.startAt / 60)
-        ) {
-          return undefined;
-        }
+    const formattedRes: Schedule[] = res.map((schedule) => {
+      const { scheduleRoles, scheduleMembers, ...rest } = schedule;
+      return newSchedule({
+        ...rest,
+        members: scheduleMembers.map((scheduleMember) => ({
+          ...scheduleMember.member,
+        })),
+        roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
+      });
+    });
 
-        const { scheduleRoles, scheduleMembers, ...rest } = schedule;
-        return newSchedule({
-          ...rest,
-          members: scheduleMembers.map((scheduleMember) => ({
-            ...scheduleMember.member,
-          })),
-          roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
-        });
-      })
-      .filter((schedule): schedule is Schedule => schedule !== undefined);
     return formattedRes;
   }
 
