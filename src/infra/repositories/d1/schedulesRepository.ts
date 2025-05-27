@@ -175,8 +175,7 @@ export class ScheduleRepository implements IScheduleRepository {
         and(
           isNull(schedules.deletedAt),
           gte(schedules.startAt, now),
-          // NOTE: start_at - remind_days * 86400 >= now
-          sql`${schedules.startAt} - ${schedules.remindDays} * 86400 >= ${now}`,
+          sql`${schedules.startAt} - ${schedules.remindDays} * 86400 <= ${now}`,
         ),
       with: {
         reminds: {
@@ -196,16 +195,27 @@ export class ScheduleRepository implements IScheduleRepository {
       orderBy: (schedules, { asc }) => [asc(schedules.startAt)],
     });
 
-    const formattedRes: Schedule[] = res.map((schedule) => {
-      const { scheduleRoles, scheduleMembers, ...rest } = schedule;
-      return newSchedule({
-        ...rest,
-        members: scheduleMembers.map((scheduleMember) => ({
-          ...scheduleMember.member,
-        })),
-        roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
-      });
-    });
+    const formattedRes: Schedule[] = res
+      .map((schedule) => {
+        // NOTE: remindされているスケジュールは除外
+        // 分単位で比較するため、now と schedule.startAt を 60 で割って整数に変換する
+        if (
+          schedule.reminds.length > 0 &&
+          Math.floor(now / 60) < Math.floor(schedule.startAt / 60)
+        ) {
+          return undefined;
+        }
+
+        const { scheduleRoles, scheduleMembers, ...rest } = schedule;
+        return newSchedule({
+          ...rest,
+          members: scheduleMembers.map((scheduleMember) => ({
+            ...scheduleMember.member,
+          })),
+          roles: scheduleRoles.map((scheduleRole) => scheduleRole.role),
+        });
+      })
+      .filter((schedule): schedule is Schedule => schedule !== undefined);
     return formattedRes;
   }
 
