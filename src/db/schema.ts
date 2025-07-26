@@ -72,7 +72,7 @@ export const coretimesRelations = relations(coretimes, ({ one, many }) => ({
     references: [members.memberId],
   }),
   scheduleCoretimes: many(scheduleCoretime),
-}))
+}));
 
 export const reminds = table("reminds", {
   id: text("id").primaryKey(),
@@ -159,18 +159,21 @@ export const scheduleCoretime = table("schedule_coretime", {
     .references(() => coretimes.id, { onDelete: "cascade" }),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
-})
+});
 
-export const scheduleCoretimeRelations = relations(scheduleCoretime, ({ one }) => ({
-  schedule: one(schedules, {
-    fields: [scheduleCoretime.scheduleId],
-    references: [schedules.id],
+export const scheduleCoretimeRelations = relations(
+  scheduleCoretime,
+  ({ one }) => ({
+    schedule: one(schedules, {
+      fields: [scheduleCoretime.scheduleId],
+      references: [schedules.id],
+    }),
+    coretime: one(coretimes, {
+      fields: [scheduleCoretime.coretimeId],
+      references: [coretimes.id],
+    }),
   }),
-  coretime: one(coretimes, {
-    fields: [scheduleCoretime.coretimeId],
-    references: [coretimes.id],
-  })
-}))
+);
 
 export const scheduleRole = table("schedule_role", {
   scheduleId: text("schedule_id")
