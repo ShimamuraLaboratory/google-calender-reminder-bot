@@ -22,6 +22,18 @@ export const members = table("members", {
   deletedAt: text("deleted_at"),
 });
 
+export const coretimes = table("coretimes", {
+  id: text("id").primaryKey(),
+  memberId: text("member_id")
+    .notNull()
+    .references(() => members.memberId, { onDelete: "cascade" }),
+  dayOfWeek: integer("day_of_week").notNull(),
+  startAt: text("start_at").notNull(),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+  deletedAt: text("deleted_at"),
+});
+
 export const roleMember = table("role_member", {
   roleId: text("role_id")
     .notNull()
@@ -51,7 +63,16 @@ export const rolesRelations = relations(roles, ({ many }) => ({
 export const membersRelations = relations(members, ({ many }) => ({
   roleMembers: many(roleMember),
   scheduleMembers: many(scheduleMember),
+  coretimes: many(coretimes),
 }));
+
+export const coretimesRelations = relations(coretimes, ({ one, many }) => ({
+  member: one(members, {
+    fields: [coretimes.memberId],
+    references: [members.memberId],
+  }),
+  scheduleCoretimes: many(scheduleCoretime),
+}))
 
 export const reminds = table("reminds", {
   id: text("id").primaryKey(),
@@ -129,6 +150,28 @@ export const scheduleMemberRelations = relations(scheduleMember, ({ one }) => ({
   }),
 }));
 
+export const scheduleCoretime = table("schedule_coretime", {
+  scheduleId: text("schedule_id")
+    .notNull()
+    .references(() => schedules.id, { onDelete: "cascade" }),
+  coretimeId: text("coretime_id")
+    .notNull()
+    .references(() => coretimes.id, { onDelete: "cascade" }),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+})
+
+export const scheduleCoretimeRelations = relations(scheduleCoretime, ({ one }) => ({
+  schedule: one(schedules, {
+    fields: [scheduleCoretime.scheduleId],
+    references: [schedules.id],
+  }),
+  coretime: one(coretimes, {
+    fields: [scheduleCoretime.coretimeId],
+    references: [coretimes.id],
+  })
+}))
+
 export const scheduleRole = table("schedule_role", {
   scheduleId: text("schedule_id")
     .notNull()
@@ -154,4 +197,5 @@ export const schedulesRelations = relations(schedules, ({ many }) => ({
   scheduleMembers: many(scheduleMember),
   scheduleRoles: many(scheduleRole),
   reminds: many(reminds),
+  scheduleCoretimes: many(scheduleCoretime),
 }));
